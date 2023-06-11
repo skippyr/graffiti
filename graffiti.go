@@ -9,9 +9,37 @@ const (
 	stdout = iota
 	stderr
 )
+const escapeCharacter = '\x1b'
+
+func removeStyleAndCursorSequences(text string) string {
+	textWithoutStyleAndCursorSequences := ""
+	hasUsedEscapeCharacter := false
+	isEscaping := false
+	for
+		characters_iterator := 0;
+		characters_iterator < len(text);
+		characters_iterator++ {
+		character := rune(text[characters_iterator])
+		if isEscaping && character == 'm' {
+			isEscaping = false
+		}
+		if hasUsedEscapeCharacter && character == '[' {
+			isEscaping = true
+		}
+		if character == escapeCharacter {
+			hasUsedEscapeCharacter = true
+		} else {
+			hasUsedEscapeCharacter = false
+		}
+		if !isEscaping {
+			textWithoutStyleAndCursorSequences = textWithoutStyleAndCursorSequences + string(character)
+		}
+	}
+	return textWithoutStyleAndCursorSequences
+}
 
 func treatText(text string) string {
-	return text
+	return removeStyleAndCursorSequences(text)
 }
 
 func write(stream int, text string) {
@@ -28,8 +56,8 @@ func WriteToStdout(text string) {
 	write(stdout, text)
 }
 
-func WriteLineToSdout(text string) {
-	write(stdout, text+"\n")
+func WriteLineToStdout(text string) {
+	write(stdout, text + "\n")
 }
 
 func WriteToStderr(text string) {
@@ -37,5 +65,5 @@ func WriteToStderr(text string) {
 }
 
 func WriteLineToStderr(text string) {
-	write(stderr, text+"\n")
+	write(stderr, text + "\n")
 }
