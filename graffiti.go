@@ -3,10 +3,11 @@ package graffiti
 import (
 	"fmt"
 	"os"
+	"golang.org/x/term"
 )
 
 const (
-	stdout = iota
+	stdout = iota + 1
 	stderr
 )
 const escapeCharacter = '\x1b'
@@ -38,12 +39,20 @@ func removeStyleAndCursorSequences(text string) string {
 	return textWithoutStyleAndCursorSequences
 }
 
-func treatText(text string) string {
-	return removeStyleAndCursorSequences(text)
+func getTextWithoutFormatSpecifiers(text string) string {
+	return "(without) " + text
 }
 
-func write(stream int, text string) {
-	treatedText := treatText(text)
+func treatText(stream int, text string) string {
+	text = removeStyleAndCursorSequences(text)
+	if !term.IsTerminal(stream) {
+		return getTextWithoutFormatSpecifiers(text)
+	}
+	return text
+}
+
+func writeToStream(stream int, text string) {
+	treatedText := treatText(stream, text)
 	if stream == stdout {
 		fmt.Print(treatedText)
 	}
@@ -52,18 +61,18 @@ func write(stream int, text string) {
 	}
 }
 
-func WriteToStdout(text string) {
-	write(stdout, text)
+func Write(text string) {
+	writeToStream(stdout, text)
 }
 
-func WriteLineToStdout(text string) {
-	write(stdout, text + "\n")
+func WriteLine(text string) {
+	writeToStream(stdout, text + "\n")
 }
 
-func WriteToStderr(text string) {
-	write(stderr, text)
+func ErrWrite(text string) {
+	writeToStream(stderr, text)
 }
 
-func WriteLineToStderr(text string) {
-	write(stderr, text + "\n")
+func ErrWriteLine(text string) {
+	writeToStream(stderr, text + "\n")
 }
