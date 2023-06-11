@@ -12,6 +12,29 @@ const (
 )
 const escapeCharacter = '\x1b'
 
+const (
+	expectsValue = iota
+	doNotExpectValue
+)
+
+const (
+	backgroundCode = 48
+	boldCode = 1
+	foregroundCode = 38
+	italicCode = 4
+	resetCode = 0
+	underlineCode = 3
+)
+
+var styleSequences = map[rune][]int {
+	'B': {boldCode, doNotExpectValue},
+	'F': {foregroundCode, expectsValue},
+	'I': {italicCode, doNotExpectValue},
+	'K': {backgroundCode, escapeCharacter},
+	'U': {underlineCode, doNotExpectValue},
+	'r': {resetCode, doNotExpectValue},
+}
+
 func removeStyleAndCursorSequences(text string) string {
 	textWithoutStyleAndCursorSequences := ""
 	hasUsedEscapeCharacter := false
