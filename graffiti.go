@@ -2,54 +2,40 @@ package graffiti
 
 import (
 	"fmt"
+	"os"
 )
 
-func createStyleSequence(code int) string {
-	return fmt.Sprintf("\x1b[%dm", code)
+const (
+	stdout = iota
+	stderr
+)
+
+func treatText(text string) string {
+	return text
 }
 
-func style(text string) string {
-	simpleFormatSpecifiers := map[rune]int {
-		'B': 1, // Bold
-		'I': 3, // Italic
-		'U': 4, // Underline
-		'r': 0, // Reset
+func write(stream int, text string) {
+	treatedText := treatText(text)
+	if stream == stdout {
+		fmt.Print(treatedText)
 	}
-	isFormatting := false
-	hasStyle := false
-	styledText := ""
-	for
-		characters_iterator := 0;
-		characters_iterator < len(text);
-		characters_iterator ++ {
-		character := rune(text[characters_iterator])
-		if character == '%' {
-			if isFormatting {
-				isFormatting = false
-			} else {
-				isFormatting = true
-			}
-		}
-		if !isFormatting {
-			styledText = styledText + string(character)
-			continue
-		}
-		for formatSpecifier, formatCode := range simpleFormatSpecifiers {
-			if character == formatSpecifier {
-				styledText = styledText + createStyleSequence(formatCode)
-				isFormatting = false
-				hasStyle = true
-			}
-		}
+	if stream == stderr {
+		fmt.Fprint(os.Stderr, treatedText)
 	}
-	if hasStyle {
-		styledText = styledText + createStyleSequence(0)
-	}
-	return styledText
 }
 
-func StdoutWrite(text string) {
-	styledText := style(text)
-	fmt.Print(styledText)
+func WriteToStdout(text string) {
+	write(stdout, text)
 }
 
+func WriteLineToSdout(text string) {
+	write(stdout, text+"\n")
+}
+
+func WriteToStderr(text string) {
+	write(stderr, text)
+}
+
+func WriteLineToStderr(text string) {
+	write(stderr, text+"\n")
+}
