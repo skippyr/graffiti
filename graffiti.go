@@ -93,6 +93,7 @@ func removeFormatSpecifiers(text string) string {
 		charactersIterator++ {
 		character := rune(text[charactersIterator])
 		if isReceivingValue {
+			valueSize ++
 			if
 				character == ' ' ||
 				character == formatSpecifierCloseDelimiter ||
@@ -100,39 +101,27 @@ func removeFormatSpecifiers(text string) string {
 				isReceivingValue = false
 				valueSize = 0
 			}
-			valueSize ++
 			continue
 		}
 		if character == formatSpecifierPrefixCharacter {
-			if isFormatting {
-				isFormatting = false
-			} else {
-				isFormatting = true
-				continue
-			}
+			isFormatting = !isFormatting
+			continue
 		}
 		if isFormatting {
-			if isExpectingValue == expectsValue {
-				isFormatting = false
-				isExpectingValue = doNotExpectValue
-				if character == formatSpecifierOpenDelimiter {
-					isReceivingValue = true
-				} else {
-					textWithoutFormatSpecifiers = textWithoutFormatSpecifiers + string(character)
-				}
-				continue
-			}
 			if len(formatSpecifiers[character]) != 0 {
 				isExpectingValue = formatSpecifiers[character][1]
 			}
-			if isExpectingValue == doNotExpectValue {
-				isFormatting = false
-			}
+			isFormatting = false
 			continue
 		}
-		if !isFormatting && !isReceivingValue {
-			textWithoutFormatSpecifiers = textWithoutFormatSpecifiers + string(character)
+		if isExpectingValue == expectsValue {
+			isExpectingValue = doNotExpectValue
+			if character == formatSpecifierOpenDelimiter {
+				isReceivingValue = true
+				continue
+			}
 		}
+		textWithoutFormatSpecifiers = textWithoutFormatSpecifiers + string(character)
 	}
 	return textWithoutFormatSpecifiers
 }
