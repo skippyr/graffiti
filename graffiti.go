@@ -3,20 +3,17 @@ package graffiti
 import (
 	"fmt"
 	"os"
-	"golang.org/x/term"
+	// "golang.org/x/term"
 )
 
 const (
 	stdout = iota + 1
 	stderr
 )
-const escapeCharacter = '\x1b'
-
 const (
 	expectsValue = iota
 	doNotExpectValue
 )
-
 const (
 	backgroundCode = 48
 	boldCode = 1
@@ -25,12 +22,18 @@ const (
 	resetCode = 0
 	underlineCode = 3
 )
+const (
+	escapeCharacter = '\x1b'
+	formatSpecifierPrefixCharacter = '%'
+	formatSpecifierOpenDelimiter = '{'
+	formatSpecifierCloseDelimiter = '}'
+)
 
-var styleSequences = map[rune][]int {
+var formatSpecifiers = map[rune][]int {
 	'B': {boldCode, doNotExpectValue},
 	'F': {foregroundCode, expectsValue},
 	'I': {italicCode, doNotExpectValue},
-	'K': {backgroundCode, escapeCharacter},
+	'K': {backgroundCode, expectsValue},
 	'U': {underlineCode, doNotExpectValue},
 	'r': {resetCode, doNotExpectValue},
 }
@@ -62,15 +65,60 @@ func removeStyleAndCursorSequences(text string) string {
 	return textWithoutStyleAndCursorSequences
 }
 
-func getTextWithoutFormatSpecifiers(text string) string {
-	return "(without) " + text
+func removeFormatSpecifiers(text string) string {
+	textWithoutFormatSpecifiers := ""
+	isFormatting := false
+	isExpectingValue := doNotExpectValue
+	isReceivingValue := false
+	for
+		characters_iterator := 0;
+		characters_iterator < len(text);
+		characters_iterator++ {
+		character := rune(text[characters_iterator])
+		if isReceivingValue {
+			if character == ' ' || character == formatSpecifierCloseDelimiter {
+				isReceivingValue = false
+			}
+			continue
+		}
+		if character == formatSpecifierPrefixCharacter {
+			if isFormatting {
+				isFormatting = false
+			} else {
+				isFormatting = true
+				continue
+			}
+		}
+		if isFormatting {
+			if isExpectingValue == expectsValue {
+				isExpectingValue = doNotExpectValue
+				isReceivingValue = true
+				continue
+			}
+			for formatSpecifier, formatSpecifierDetails := range formatSpecifiers {
+				if character == formatSpecifier {
+					isExpectingValue = formatSpecifierDetails[1]
+					break
+				}
+			}
+			if isExpectingValue == doNotExpectValue {
+				isFormatting = false
+			}
+			continue
+		}
+		if !isFormatting && !isReceivingValue {
+			textWithoutFormatSpecifiers = textWithoutFormatSpecifiers + string(character)
+		}
+	}
+	return textWithoutFormatSpecifiers
 }
 
 func treatText(stream int, text string) string {
 	text = removeStyleAndCursorSequences(text)
-	if !term.IsTerminal(stream) {
-		return getTextWithoutFormatSpecifiers(text)
-	}
+	text = removeFormatSpecifiers(text)
+	// if !term.IsTerminal(stream) {
+	//	return getTextWithoutFormatSpecifiers(text)
+	//}
 	return text
 }
 
