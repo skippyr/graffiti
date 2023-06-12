@@ -29,7 +29,6 @@ const (
 	formatSpecifierCloseDelimiter = '}'
 )
 const greatestFormatSpecifierValue = len("magenta")
-
 var formatSpecifiers = map[rune][]int {
 	'B': {boldCode, doNotExpectValue},
 	'F': {foregroundCode, expectsValue},
@@ -107,11 +106,8 @@ func removeFormatSpecifiers(text string) string {
 				}
 				continue
 			}
-			for formatSpecifier, formatSpecifierDetails := range formatSpecifiers {
-				if character == formatSpecifier {
-					isExpectingValue = formatSpecifierDetails[1]
-					break
-				}
+			if len(formatSpecifiers[character]) != 0 {
+				isExpectingValue = formatSpecifiers[character][1]
 			}
 			if isExpectingValue == doNotExpectValue {
 				isFormatting = false
