@@ -28,6 +28,7 @@ const (
 	formatSpecifierOpenDelimiter = '{'
 	formatSpecifierCloseDelimiter = '}'
 )
+const greatestFormatSpecifierValue = len("magenta")
 
 var formatSpecifiers = map[rune][]int {
 	'B': {boldCode, doNotExpectValue},
@@ -70,15 +71,21 @@ func removeFormatSpecifiers(text string) string {
 	isFormatting := false
 	isExpectingValue := doNotExpectValue
 	isReceivingValue := false
+	valueSize := 0
 	for
 		characters_iterator := 0;
 		characters_iterator < len(text);
 		characters_iterator++ {
 		character := rune(text[characters_iterator])
 		if isReceivingValue {
-			if character == ' ' || character == formatSpecifierCloseDelimiter {
+			if
+				character == ' ' ||
+				character == formatSpecifierCloseDelimiter ||
+				valueSize > greatestFormatSpecifierValue {
 				isReceivingValue = false
+				valueSize = 0
 			}
+			valueSize ++
 			continue
 		}
 		if character == formatSpecifierPrefixCharacter {
@@ -91,8 +98,13 @@ func removeFormatSpecifiers(text string) string {
 		}
 		if isFormatting {
 			if isExpectingValue == expectsValue {
+				isFormatting = false
 				isExpectingValue = doNotExpectValue
-				isReceivingValue = true
+				if character == formatSpecifierOpenDelimiter {
+					isReceivingValue = true
+				} else {
+					textWithoutFormatSpecifiers = textWithoutFormatSpecifiers + string(character)
+				}
 				continue
 			}
 			for formatSpecifier, formatSpecifierDetails := range formatSpecifiers {
