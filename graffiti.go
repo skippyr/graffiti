@@ -47,20 +47,24 @@ func removeStyleAndCursorSequences(text string) string {
 		characters_iterator < len(text);
 		characters_iterator++ {
 		character := rune(text[characters_iterator])
-		if isEscaping && character == 'm' {
-			isEscaping = false
+		if isEscaping {
+			if character == 'm' {
+				isEscaping = false
+			}
+			continue
 		}
 		if hasUsedEscapeCharacter && character == '[' {
 			isEscaping = true
+			hasUsedEscapeCharacter = false
+			continue
 		}
 		if character == escapeCharacter {
 			hasUsedEscapeCharacter = true
+			continue
 		} else {
 			hasUsedEscapeCharacter = false
 		}
-		if !isEscaping {
-			textWithoutStyleAndCursorSequences = textWithoutStyleAndCursorSequences + string(character)
-		}
+		textWithoutStyleAndCursorSequences = textWithoutStyleAndCursorSequences + string(character)
 	}
 	return textWithoutStyleAndCursorSequences
 }
