@@ -24,7 +24,7 @@ const (
 )
 const (
 	escapeCharacter = '\x1b'
-	formatSpecifierPrefixCharacter = '%'
+	formatSpecifierPrefixCharacter = '@'
 	formatSpecifierOpenDelimiter = '{'
 	formatSpecifierCloseDelimiter = '}'
 )

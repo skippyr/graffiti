@@ -29,7 +29,7 @@ func TestRemoveHiddenSequences(test *testing.T) {
 }
 
 func TestRemoveFormatSpecifiers(test *testing.T) {
-	sample := "%F{red}Here %BAre%I %UGoats. %FMore %F}text %F{here.%r More"
+	sample := "@F{red}Here @BAre@I @UGoats. @FMore @F}text @F{here.%r More"
 	expectedResult := "Here Are Goats. More }text More"
 	result := removeFormatSpecifiers(&sample)
 	if result != expectedResult {
