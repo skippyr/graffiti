@@ -5,7 +5,7 @@ import (
 )
 
 func TestRemoveStyleAndCursorSequences(test *testing.T) {
-	sample := "\x1b[31m[Here] Are Goats\x1b[0m"
+	sample := "\x1b[31m[Here] \x1b[2JAre\x1b[3B Goats\x1b[3H\x1b[0m"
 	expectedResult := "[Here] Are Goats"
 	result := removeStyleAndCursorSequences(sample)
 	if result != expectedResult {
