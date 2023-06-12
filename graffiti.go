@@ -31,11 +31,11 @@ const (
 const greatestFormatSpecifierValue = len("magenta")
 var hiddenSequencesDelimiters = []rune {
 	'H', // Move cursor
-	'J', // Clear Screen
+	'J', // Clear screen
 	'A', // Move cursor up
 	'B', // Move cursor down
 	'C', // Move cursor right
-	'D', // Move cursor Left
+	'D', // Move cursor left
 	'E', // Move cursor to beggining of next line
 	'F', // Move cursor to beggining of previous line
 	'm', // Style

@@ -2,11 +2,20 @@ package graffiti
 
 import (
 	"testing"
+	"strconv"
 )
 
 func TestRemoveHiddenSequences(test *testing.T) {
-	sample := "\x1b[31m[Here] \x1b[2JAre\x1b[3B Goats\x1b[3H\x1b[0m"
-	expectedResult := "[Here] Are Goats"
+	sample := ""
+	expectedResult := ""
+	for
+		delimitersIterator := 0;
+		delimitersIterator < len(hiddenSequencesDelimiters);
+		delimitersIterator ++ {
+		delimiter := hiddenSequencesDelimiters[delimitersIterator]
+		sample = sample + " \x1b[30" + string(delimiter) + strconv.Itoa(delimitersIterator)
+		expectedResult = expectedResult + " " + strconv.Itoa(delimitersIterator)
+	}
 	result := removeHiddenSequences(sample)
 	if result != expectedResult {
 		test.Errorf(
