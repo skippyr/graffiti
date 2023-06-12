@@ -29,6 +29,17 @@ const (
 	formatSpecifierCloseDelimiter = '}'
 )
 const greatestFormatSpecifierValue = len("magenta")
+var hiddenSequencesDelimiters = []rune {
+	'H', // Move cursor
+	'J', // Clear Screen
+	'A', // Move cursor up
+	'B', // Move cursor down
+	'C', // Move cursor right
+	'D', // Move cursor Left
+	'E', // Move cursor to beggining of next line
+	'F', // Move cursor to beggining of previous line
+	'm', // Style
+}
 var formatSpecifiers = map[rune][]int {
 	'B': {boldCode, doNotExpectValue},
 	'F': {foregroundCode, expectsValue},
@@ -38,21 +49,26 @@ var formatSpecifiers = map[rune][]int {
 	'r': {resetCode, doNotExpectValue},
 }
 
-func removeStyleAndCursorSequences(text string) string {
+func removeHiddenSequences(text string) string {
 	textWithoutStyleAndCursorSequences := ""
 	hasUsedEscapeCharacter := false
 	isEscaping := false
 	for
-		characters_iterator := 0;
-		characters_iterator < len(text);
-		characters_iterator++ {
-		character := rune(text[characters_iterator])
+		charactersIterator := 0;
+		charactersIterator < len(text);
+		charactersIterator++ {
+		character := rune(text[charactersIterator])
 		if isEscaping {
-			isEscaping =
-				character != 'm' &&
-				character != 'J' &&
-				character != 'H' &&
-				character != 'B'
+			for
+				delimitersIterator := 0;
+				delimitersIterator < len(hiddenSequencesDelimiters);
+				delimitersIterator ++ {
+				delimiter := hiddenSequencesDelimiters[delimitersIterator]
+				if character == delimiter {
+					isEscaping = false
+					break
+				}
+			}
 			continue
 		}
 		isEscaping = hasUsedEscapeCharacter && character == '['
@@ -72,10 +88,10 @@ func removeFormatSpecifiers(text string) string {
 	isReceivingValue := false
 	valueSize := 0
 	for
-		characters_iterator := 0;
-		characters_iterator < len(text);
-		characters_iterator++ {
-		character := rune(text[characters_iterator])
+		charactersIterator := 0;
+		charactersIterator < len(text);
+		charactersIterator++ {
+		character := rune(text[charactersIterator])
 		if isReceivingValue {
 			if
 				character == ' ' ||
@@ -122,7 +138,7 @@ func removeFormatSpecifiers(text string) string {
 }
 
 func treatText(stream int, text string) string {
-	text = removeStyleAndCursorSequences(text)
+	text = removeHiddenSequences(text)
 	text = removeFormatSpecifiers(text)
 	// if !term.IsTerminal(stream) {
 	//	return getTextWithoutFormatSpecifiers(text)

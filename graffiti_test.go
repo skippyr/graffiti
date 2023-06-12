@@ -4,13 +4,13 @@ import (
 	"testing"
 )
 
-func TestRemoveStyleAndCursorSequences(test *testing.T) {
+func TestRemoveHiddenSequences(test *testing.T) {
 	sample := "\x1b[31m[Here] \x1b[2JAre\x1b[3B Goats\x1b[3H\x1b[0m"
 	expectedResult := "[Here] Are Goats"
-	result := removeStyleAndCursorSequences(sample)
+	result := removeHiddenSequences(sample)
 	if result != expectedResult {
 		test.Errorf(
-			"Failed to remove style and cursor sequences. Expected \"%s\" (%d characters) but received \"%s\" (%d characters).",
+			"Failed to remove hidden sequences. Expected \"%s\" (%d characters) but received \"%s\" (%d characters).",
 			expectedResult,
 			len(expectedResult),
 			result,
