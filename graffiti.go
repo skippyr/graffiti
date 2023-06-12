@@ -3,7 +3,7 @@ package graffiti
 import (
 	"fmt"
 	"os"
-	// "golang.org/x/term"
+	"golang.org/x/term"
 )
 
 const (
@@ -49,15 +49,11 @@ var formatSpecifiers = map[rune][]int {
 	'r': {resetCode, doNotExpectValue},
 }
 
-func removeHiddenSequences(text string) string {
+func removeHiddenSequences(text *string) string {
 	textWithoutStyleAndCursorSequences := ""
 	hasUsedEscapeCharacter := false
 	isEscaping := false
-	for
-		charactersIterator := 0;
-		charactersIterator < len(text);
-		charactersIterator++ {
-		character := rune(text[charactersIterator])
+	for _, character := range *text {
 		if isEscaping {
 			for
 				delimitersIterator := 0;
@@ -81,17 +77,13 @@ func removeHiddenSequences(text string) string {
 	return textWithoutStyleAndCursorSequences
 }
 
-func removeFormatSpecifiers(text string) string {
+func removeFormatSpecifiers(text *string) string {
 	textWithoutFormatSpecifiers := ""
 	isFormatting := false
 	isExpectingValue := doNotExpectValue
 	isReceivingValue := false
 	valueSize := 0
-	for
-		charactersIterator := 0;
-		charactersIterator < len(text);
-		charactersIterator++ {
-		character := rune(text[charactersIterator])
+	for _, character := range *text {
 		if isReceivingValue {
 			valueSize ++
 			if
@@ -127,11 +119,10 @@ func removeFormatSpecifiers(text string) string {
 }
 
 func treatText(stream int, text string) string {
-	text = removeHiddenSequences(text)
-	text = removeFormatSpecifiers(text)
-	// if !term.IsTerminal(stream) {
-	//	return getTextWithoutFormatSpecifiers(text)
-	//}
+	text = removeHiddenSequences(&text)
+	if !term.IsTerminal(stream) {
+		return removeFormatSpecifiers(&text)
+	}
 	return text
 }
 
