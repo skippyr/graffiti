@@ -115,36 +115,36 @@ func removeFormatSpecifiers(text *string) string {
 	return textWithoutFormatSpecifiers
 }
 
-func treatText(stream int, text string) string {
-	text = removeHiddenSequences(&text)
+func treatText(stream int, text *string) string {
+	treatedText := removeHiddenSequences(text)
 	if !term.IsTerminal(stream) {
-		return removeFormatSpecifiers(&text)
+		return removeFormatSpecifiers(&treatedText)
 	}
-	return text
+	return treatedText
 }
 
-func writeToStream(stream int, text string) {
-	treatedText := treatText(stream, text)
+func writeToStream(stream int, text string, a ...any) {
+	treatedText := treatText(stream, &text)
 	if stream == stdout {
-		fmt.Print(treatedText)
+		fmt.Printf(treatedText, a...)
 	}
 	if stream == stderr {
-		fmt.Fprint(os.Stderr, treatedText)
+		fmt.Fprintf(os.Stderr, treatedText, a...)
 	}
 }
 
-func Print(text string) {
-	writeToStream(stdout, text)
+func Print(text string, a ...any) {
+	writeToStream(stdout, text, a...)
 }
 
-func Println(text string) {
-	writeToStream(stdout, text + "\n")
+func Println(text string, a ...any) {
+	writeToStream(stdout, text + "\n", a...)
 }
 
-func EPrint(text string) {
-	writeToStream(stderr, text)
+func EPrint(text string, a ...any) {
+	writeToStream(stderr, text, a...)
 }
 
-func EPrintln(text string) {
-	writeToStream(stderr, text + "\n")
+func EPrintln(text string, a ...any) {
+	writeToStream(stderr, text + "\n", a...)
 }
