@@ -55,11 +55,7 @@ func removeHiddenSequences(text *string) string {
 	isEscaping := false
 	for _, character := range *text {
 		if isEscaping {
-			for
-				delimitersIterator := 0;
-				delimitersIterator < len(hiddenSequencesDelimiters);
-				delimitersIterator ++ {
-				delimiter := hiddenSequencesDelimiters[delimitersIterator]
+			for _, delimiter := range hiddenSequencesDelimiters {
 				if character == delimiter {
 					isEscaping = false
 					break
@@ -97,14 +93,15 @@ func removeFormatSpecifiers(text *string) string {
 		}
 		if character == formatSpecifierPrefixCharacter {
 			isFormatting = !isFormatting
-			continue
+			if isFormatting {
+				continue
+			}
 		}
 		if isFormatting {
 			if len(formatSpecifiers[character]) != 0 {
 				isExpectingValue = formatSpecifiers[character][1]
 			}
 			isFormatting = false
-			continue
 		}
 		if isExpectingValue == expectsValue {
 			isExpectingValue = doNotExpectValue
