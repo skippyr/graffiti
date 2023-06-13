@@ -1,40 +1,120 @@
-<h1>Graffiti</h1>
-	<h2>Starting Point</h2>
-		<p>Graffiti is a Go library to ease pretty print to standard streams.</p>
-		<p>It exists to solve a very common and annoying problem: coloring and formatting the output of programs. This is a hard task, as it envolves dealing with ANSI escape sequences that are hard to debug, as they are invisible when printed.</p>
-		<p>Not just that, but if your program is piped to other program or file, all the ANSI sequences will remain unless you deal with them, which will make the output be hard to parse and understand.</p>
-		<p>To solve it, Graffiti brings up new <code>fmt.Printf</code>-like functions that can understand all format specifiers <code>fmt.Printf</code> can as well new format specifiers to apply styles and print strings into standard streams.</p>
-		<p>Those functions will automatically parse, add or remove ANSI sequences as well their own format specifiers based if the stream is being piped or not, so you can apply styles easily.</p>
-		<p>This library is not cross-platform: styles will only be applied in UNIX-like operating systems, while on Windows, they will be removed.</p>
-	<h2>Installation</h2>
-		<p>Not yet available for production.</p>
-	<h2>Usage</h2>
-		<h3>Formatters</h3>
-			<ul>
-				<li><code>@F{&lt;color&gt;}</code>: changes the foreground color.</li>
-				<li><code>@K{&lt;color&gt;}</code>: changes the background color.</li>
-				<li><code>@B</code>: use bold. Only visible if the font used in the terminal has bold chracters.</li>
-				<li><code>@I</code>: use italic. Only visible if the font used in the terminal has italic chracters.</li>
-				<li><code>@U</code>: use underline.</li>
-				<li><code>@r</code>: remove all styles applied.</li>
-			</ul>
-			<p>The <code>&lt;color&gt;</code> placeholder must be replaced by the value of a color of the 8 bits palette (values from 0 to 255 - full palette can be found online) or the name of a color of the 3 bits palette:</p>
-			<ul>
-				<li><code>red</code>: same as value <code>1</code></li>
-				<li><code>green</code>: same as value <code>2</code></li>
-				<li><code>yellow</code>: same as value <code>3</code></li>
-				<li><code>blue</code>: same as value <code>4</code></li>
-				<li><code>magenta</code>: same as value <code>5</code></li>
-				<li><code>cyan</code>: same as value <code>6</code></li>
-				<li><code>white</code>: same as value <code>7</code></li>
-			</ul>
-			<p>If the value used is invalid, no style will be applied for that format specifier.</p>
-			<p>Old terminal emulators, have limited capabilities when rendering fonts and colors. If you want your program to support them, avoid using bold and italic, and prefer to use only colors of the 3 bits palette.</p>
-			<p>Some terminal emulators, for instance, <code>st</code>, <code>konsole</code> and <code>linux</code> (the default virtual console of Linux), might render bold or italic with a brighter color.</p>
-	<h2>Issues</h2>
-		<p>Report issues through the <a href="https://github.com/skippyr/issues">issues tab</a>.</p>
-	<h2>Contributions</h2>
-		<p>If you want to contribute to this project, check out its <a href="https://skippyr.github.io/materials/pages/contributions_guidelines.html">contributions guidelines</a>.</p>
-	<h2>License</h2>
-		<p>This project is released under the terms of the MIT license.</p>
-		<p>Copyright (c) 2023, Sherman Rofeman. MIT License.</p>
+# Graffiti
+
+## Starting Point
+
+Graffiti is a Go library to ease pretty print to standard streams.
+
+It exists to solve a very common and annoying problem: coloring and formatting the output of programs. This is a hard task, as it envolves dealing with ANSI escape sequences that are hard to debug, as they are invisible when printed.
+
+Not just that, but if your program is piped to other program or file, all the ANSI sequences will remain unless you deal with them, which will make the output be hard to parse and understand.
+
+To solve it, Graffiti brings up new fmt.Printf-like functions that can understand all format specifiers fmt.Printf can as well new format specifiers to apply styles and print strings into standard streams.
+
+Those functions will automatically parse, add or remove ANSI sequences as well their own format specifiers based if the stream is being piped or not, so you can apply styles easily.
+
+This library is not cross-platform: styles will only be applied in UNIX-like operating systems, while on Windows, they will be removed.
+
+## Installation
+
+It is not available for production yet.
+
+## Usage
+
+### Functions
+
+Graffiti offers some functions for you do to your work:
+
+* `graffiti.Print`: prints to `stdout`.
+* `graffiti.Println`: prints to `stdout` and appends a new line character in the end.
+* `graffiti.Eprintln`: prints to `stderr`.
+* `graffiti.Eprintln`: prints to `stderr` and appends a new line character in the end.
+
+Those functions are wrapper of the `fmt.Sprintf` function, which means that you can them to format data just like you normally do with the `fmt.Printf`. The difference is that they can interpret new format specifiers to apply styles.
+
+They will automatically replace those format specifiers with styles sequences, or will remove them automatically of the string if it detects that the stream is not a terminal.
+
+### Formatter Specifiers
+
+* `@F{<color>}`: changes the foreground color.
+* `@K{<color>}`: changes the background color.
+* `@B`: uses bold. Only visible if font contains bold characters.
+* `@I`: uses italic. Only visible if font contains italic characters.
+* `@U`: uses underline.
+* `@r`: removes all styles applied.
+
+The `<color>` placeholder must be replaced by the value of a color of the 8 bits palette (values from 0 to 255 - full palette can be found online) or the name of a color of the 3 bits palette:
+
+* `red`: same as value `1`.
+* `green`: same as value `2`.
+* `yellow`: same as value `3`.
+* `blue`: same as value `4`.
+* `magenta`: same as value `5`.
+* `cyan`: same as value `6`.
+* `white`: same as value `7`.
+
+If the value used is invalid, no style will be applied for that format specifier.
+
+You do not need to reset your styles in the end of the string, as Graffiti automatically does it for you if detects that you have used a style.
+
+Old terminal emulators, have limited capabilities when rendering fonts and colors. If you want your program to support them, avoid using bold and italic, and prefer to use only colors of the 3 bits palette.
+
+Some terminal emulators, for instance, st, konsole and linux (the default virtual console of Linux), might render bold or italic with a brighter color.
+
+### Examples
+
+Let's create a simple program to test Graffiti's capabilities.
+
+```go
+// File: main.go
+
+package main
+
+import (
+	"github.com/skippyr/graffiti"
+)
+
+func main() {
+	// Prints a colorful "Hello World!".
+	graffiti.Println("@F{yellow}Hello @F{green}world@F{magenta}!")
+
+	// Formats and prints a colorful error message.
+	errorMsg := "No Such File Or Directory"
+	errorOsCode := 2
+	graffiti.Eprintln(
+		"@F{red}@BError:@r @F{yellow}%s @r(os code @F{red}%d@r).",
+		errorMsg,
+		errorOsCode,
+	)
+}
+```
+
+Now, let's run this program and see its output:
+
+```bash
+go run main.go
+```
+
+![](images/preview.png)
+
+To see if the sequences will be removed, let's check out what will be put in a file if the output of the program is redirected:
+
+```bash
+go run main.go &>output.txt; cat output.txt
+```
+
+![](images/preview_pipeline.png)
+
+## Issues
+
+Report issues through the [issues tab](https://github.com/skippyr/graffiti/issues).
+
+## Contributions
+
+If you want to contribute to this project, check out its [contributions guidelines](https://skippyr.github.io/materials/pages/contributions_guidelines.html).
+
+## License
+
+This project is released under the terms of the MIT license.
+
+Copyright (c) 2023, Sherman Rofeman. MIT License.
+
