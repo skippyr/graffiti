@@ -114,12 +114,42 @@ func removeFormatSpecifiers(text *string) string {
 	return textWithoutFormatSpecifiers
 }
 
+func createSimpleStyleSequence(ansiCode int) string {
+	return fmt.Sprintf("%c[%dm", escapeCharacter, ansiCode)
+}
+
+func replaceFormatSpecifiers(text *string) string {
+	textWithFormatSpecifiersReplaced := ""
+	isFormatting := false
+	isExpectingValue := doNotExpectValue
+	for _, character := range *text {
+		if character == formatSpecifierPrefixCharacter {
+			isFormatting = !isFormatting
+			if isFormatting {
+				continue
+			}
+		}
+		if isFormatting {
+			isFormatting = false
+			if len(formatSpecifiers[character]) > 0 {
+				isExpectingValue = formatSpecifiers[character][1]
+				if isExpectingValue == doNotExpectValue {
+					textWithFormatSpecifiersReplaced = textWithFormatSpecifiersReplaced + createSimpleStyleSequence(formatSpecifiers[character][0])
+				}
+				continue
+			}
+		}
+		textWithFormatSpecifiersReplaced = textWithFormatSpecifiersReplaced + string(character)
+	}
+	return textWithFormatSpecifiersReplaced
+}
+
 func treatText(stream int, text *string) string {
 	treatedText := removeAnsiEscapeSequences(text)
-	treatedText = removeFormatSpecifiers(&treatedText)
 	if !term.IsTerminal(stream) {
 		return removeFormatSpecifiers(&treatedText)
 	}
+	treatedText = replaceFormatSpecifiers(&treatedText)
 	return treatedText
 }
 
