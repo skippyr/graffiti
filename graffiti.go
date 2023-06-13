@@ -2,8 +2,8 @@ package graffiti
 
 import (
 	"fmt"
-	"os"
 	"golang.org/x/term"
+	"os"
 )
 
 const (
@@ -16,20 +16,21 @@ const (
 )
 const (
 	backgroundAnsiCode = 48
-	boldAnsiCode = 1
+	boldAnsiCode       = 1
 	foregroundAnsiCode = 38
-	italicAnsiCode = 4
-	resetAnsiCode = 0
-	underlineAnsiCode = 3
+	italicAnsiCode     = 4
+	resetAnsiCode      = 0
+	underlineAnsiCode  = 3
 )
 const (
-	escapeCharacter = '\x1b'
+	escapeCharacter                = '\x1b'
 	formatSpecifierPrefixCharacter = '@'
-	formatSpecifierOpenDelimiter = '{'
-	formatSpecifierCloseDelimiter = '}'
+	formatSpecifierOpenDelimiter   = '{'
+	formatSpecifierCloseDelimiter  = '}'
 )
-const greatestFormatSpecifierValue = len("magenta")
-var ansiEscapeSequencesDelimiters = []rune {
+const greatestFormatSpecifierValue = "magenta"
+
+var ansiEscapeSequencesDelimiters = []rune{
 	'H', // Move cursor
 	'J', // Clear screen
 	'A', // Move cursor up
@@ -40,7 +41,7 @@ var ansiEscapeSequencesDelimiters = []rune {
 	'F', // Move cursor to beggining of previous line
 	'm', // Style
 }
-var formatSpecifiers = map[rune][]int {
+var formatSpecifiers = map[rune][]int{
 	'B': {boldAnsiCode, doNotExpectValue},
 	'F': {foregroundAnsiCode, expectsValue},
 	'I': {italicAnsiCode, doNotExpectValue},
@@ -78,18 +79,22 @@ func removeFormatSpecifiers(text *string) string {
 	isFormatting := false
 	isExpectingValue := doNotExpectValue
 	isReceivingValue := false
-	valueSize := 0
+	valueLength := 0
 	for _, character := range *text {
 		if isReceivingValue {
-			valueSize ++
-			if
-				character == ' ' ||
-				character == formatSpecifierCloseDelimiter ||
-				valueSize > greatestFormatSpecifierValue {
+			if character == ' ' || character == formatSpecifierCloseDelimiter || valueLength > len(greatestFormatSpecifierValue) {
 				isReceivingValue = false
-				valueSize = 0
+				valueLength = 0
 			}
+			valueLength++
 			continue
+		}
+		if isExpectingValue == expectsValue {
+			isExpectingValue = doNotExpectValue
+			if character == formatSpecifierOpenDelimiter {
+				isReceivingValue = true
+				continue
+			}
 		}
 		if character == formatSpecifierPrefixCharacter {
 			isFormatting = !isFormatting
@@ -98,15 +103,9 @@ func removeFormatSpecifiers(text *string) string {
 			}
 		}
 		if isFormatting {
-			if len(formatSpecifiers[character]) != 0 {
-				isExpectingValue = formatSpecifiers[character][1]
-			}
 			isFormatting = false
-		}
-		if isExpectingValue == expectsValue {
-			isExpectingValue = doNotExpectValue
-			if character == formatSpecifierOpenDelimiter {
-				isReceivingValue = true
+			if len(formatSpecifiers[character]) > 0 {
+				isExpectingValue = formatSpecifiers[character][1]
 				continue
 			}
 		}
@@ -117,6 +116,7 @@ func removeFormatSpecifiers(text *string) string {
 
 func treatText(stream int, text *string) string {
 	treatedText := removeAnsiEscapeSequences(text)
+	treatedText = removeFormatSpecifiers(&treatedText)
 	if !term.IsTerminal(stream) {
 		return removeFormatSpecifiers(&treatedText)
 	}
@@ -139,7 +139,7 @@ func Print(text string, a ...any) (n int, err error) {
 }
 
 func Println(text string, a ...any) (n int, err error) {
-	return writeToStream(stdout, text + "\n", a...)
+	return writeToStream(stdout, text+"\n", a...)
 }
 
 func EPrint(text string, a ...any) (n int, err error) {
@@ -147,5 +147,5 @@ func EPrint(text string, a ...any) (n int, err error) {
 }
 
 func EPrintln(text string, a ...any) (n int, err error) {
-	return writeToStream(stderr, text + "\n", a...)
+	return writeToStream(stderr, text+"\n", a...)
 }
