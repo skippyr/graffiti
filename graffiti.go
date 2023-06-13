@@ -232,10 +232,10 @@ func Println(text string, a ...any) (n int, err error) {
 	return writeToStream(stdout, text+"\n", a...)
 }
 
-func EPrint(text string, a ...any) (n int, err error) {
+func Eprint(text string, a ...any) (n int, err error) {
 	return writeToStream(stderr, text, a...)
 }
 
-func EPrintln(text string, a ...any) (n int, err error) {
+func Eprintln(text string, a ...any) (n int, err error) {
 	return writeToStream(stderr, text+"\n", a...)
 }
