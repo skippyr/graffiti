@@ -213,12 +213,13 @@ func treatText(stream int, text *string) string {
 }
 
 func writeToStream(stream int, text string, a ...any) (n int, err error) {
-	treatedText := treatText(stream, &text)
+	treatedText := fmt.Sprintf(text, a...)
+	treatedText = treatText(stream, &treatedText)
 	if stream == stdout {
-		return fmt.Printf(treatedText, a...)
+		return fmt.Printf(treatedText)
 	}
 	if stream == stderr {
-		return fmt.Fprintf(os.Stderr, treatedText, a...)
+		return fmt.Fprintf(os.Stderr, treatedText)
 	}
 	return 0, nil
 }
