@@ -165,8 +165,9 @@ func replaceFormatSpecifiers(text *string) string {
 				isReceivingValue = false
 				value = ""
 				ansiCode = 0
+			} else {
+				value = value + string(character)
 			}
-			value = value + string(character)
 			continue
 		}
 		if isExpectingValue == expectsValue {
