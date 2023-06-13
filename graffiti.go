@@ -133,18 +133,18 @@ func writeToStream(stream int, text string) {
 	}
 }
 
-func Write(text string) {
+func Print(text string) {
 	writeToStream(stdout, text)
 }
 
-func WriteLine(text string) {
+func Println(text string) {
 	writeToStream(stdout, text + "\n")
 }
 
-func ErrWrite(text string) {
+func EPrint(text string) {
 	writeToStream(stderr, text)
 }
 
-func ErrWriteLine(text string) {
+func EPrintln(text string) {
 	writeToStream(stderr, text + "\n")
 }
