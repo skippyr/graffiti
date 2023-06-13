@@ -40,10 +40,12 @@ They will automatically replace those format specifiers with styles sequences, o
 * `@B`: uses bold. Only visible if font contains bold characters.
 * `@I`: uses italic. Only visible if font contains italic characters.
 * `@U`: uses underline.
+* `@@`: uses an actual `@` character.
 * `@r`: removes all styles applied.
 
 The `<color>` placeholder must be replaced by the value of a color of the 8 bits palette (values from 0 to 255 - full palette can be found online) or the name of a color of the 3 bits palette:
 
+* `black`: same as value `1`.
 * `red`: same as value `1`.
 * `green`: same as value `2`.
 * `yellow`: same as value `3`.
