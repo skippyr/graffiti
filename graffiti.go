@@ -20,9 +20,9 @@ const (
 	backgroundAnsiCode = 48
 	boldAnsiCode       = 1
 	foregroundAnsiCode = 38
-	italicAnsiCode     = 4
+	italicAnsiCode     = 3
 	resetAnsiCode      = 0
-	underlineAnsiCode  = 3
+	underlineAnsiCode  = 4
 	invalidAnsiColor   = -1
 )
 const (
