@@ -29,7 +29,7 @@ const (
 	formatSpecifierCloseDelimiter = '}'
 )
 const greatestFormatSpecifierValue = len("magenta")
-var hiddenSequencesDelimiters = []rune {
+var ansiEscapeSequencesDelimiters = []rune {
 	'H', // Move cursor
 	'J', // Clear screen
 	'A', // Move cursor up
@@ -49,13 +49,13 @@ var formatSpecifiers = map[rune][]int {
 	'r': {resetCode, doNotExpectValue},
 }
 
-func removeHiddenSequences(text *string) string {
+func removeAnsiEscapeSequences(text *string) string {
 	textWithoutStyleAndCursorSequences := ""
 	hasUsedEscapeCharacter := false
 	isEscaping := false
 	for _, character := range *text {
 		if isEscaping {
-			for _, delimiter := range hiddenSequencesDelimiters {
+			for _, delimiter := range ansiEscapeSequencesDelimiters {
 				if character == delimiter {
 					isEscaping = false
 					break
@@ -116,7 +116,7 @@ func removeFormatSpecifiers(text *string) string {
 }
 
 func treatText(stream int, text *string) string {
-	treatedText := removeHiddenSequences(text)
+	treatedText := removeAnsiEscapeSequences(text)
 	if !term.IsTerminal(stream) {
 		return removeFormatSpecifiers(&treatedText)
 	}
