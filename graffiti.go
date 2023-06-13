@@ -2,8 +2,10 @@ package graffiti
 
 import (
 	"fmt"
-	"golang.org/x/term"
+	"strconv"
 	"os"
+
+	"golang.org/x/term"
 )
 
 const (
@@ -21,6 +23,7 @@ const (
 	italicAnsiCode     = 4
 	resetAnsiCode      = 0
 	underlineAnsiCode  = 3
+	invalidAnsiColor   = -1
 )
 const (
 	escapeCharacter                = '\x1b'
@@ -40,6 +43,16 @@ var ansiEscapeSequencesDelimiters = []rune{
 	'E', // Move cursor to beggining of next line
 	'F', // Move cursor to beggining of previous line
 	'm', // Style
+}
+var ansiColors = map[string]int{
+	"black": 0,
+	"red": 1,
+	"green": 2,
+	"yellow": 3,
+	"blue": 4,
+	"magenta": 5,
+	"cyan": 6,
+	"white": 7,
 }
 var formatSpecifiers = map[rune][]int{
 	'B': {boldAnsiCode, doNotExpectValue},
@@ -118,11 +131,51 @@ func createSimpleStyleSequence(ansiCode int) string {
 	return fmt.Sprintf("%c[%dm", escapeCharacter, ansiCode)
 }
 
+func convertStringToAnsiColor(value *string) int {
+	if ansiColors[*value] != 0 || (ansiColors[*value] == 0 && *value == "black") {
+		return ansiColors[*value]
+	}
+	ansiColor, err := strconv.Atoi(*value)
+	if err != nil || ansiColor < 0 || ansiColor > 255 {
+		return invalidAnsiColor
+	}
+	return ansiColor
+}
+
+func createStyleSequenceWithColor(ansiCode int, ansiColor int) string {
+	return fmt.Sprintf("%c[%d;5;%dm", escapeCharacter, ansiCode, ansiColor)
+}
+
 func replaceFormatSpecifiers(text *string) string {
 	textWithFormatSpecifiersReplaced := ""
 	isFormatting := false
+	isReceivingValue := false
 	isExpectingValue := doNotExpectValue
+	ansiCode := 0
+	value := ""
+	hasStyle := false
 	for _, character := range *text {
+		if isReceivingValue {
+			if character == ' ' || character == formatSpecifierCloseDelimiter || len(value) > len(greatestFormatSpecifierValue) {
+				ansiColor := convertStringToAnsiColor(&value)
+				if ansiColor != invalidAnsiColor {
+					textWithFormatSpecifiersReplaced = textWithFormatSpecifiersReplaced + createStyleSequenceWithColor(ansiCode, ansiColor)
+					hasStyle = true
+				}
+				isReceivingValue = false
+				value = ""
+				ansiCode = 0
+			}
+			value = value + string(character)
+			continue
+		}
+		if isExpectingValue == expectsValue {
+			isExpectingValue = doNotExpectValue
+			if character == formatSpecifierOpenDelimiter {
+				isReceivingValue = true
+				continue
+			}
+		}
 		if character == formatSpecifierPrefixCharacter {
 			isFormatting = !isFormatting
 			if isFormatting {
@@ -133,13 +186,18 @@ func replaceFormatSpecifiers(text *string) string {
 			isFormatting = false
 			if len(formatSpecifiers[character]) > 0 {
 				isExpectingValue = formatSpecifiers[character][1]
+				ansiCode = formatSpecifiers[character][0]
 				if isExpectingValue == doNotExpectValue {
 					textWithFormatSpecifiersReplaced = textWithFormatSpecifiersReplaced + createSimpleStyleSequence(formatSpecifiers[character][0])
+					hasStyle = true
 				}
 				continue
 			}
 		}
 		textWithFormatSpecifiersReplaced = textWithFormatSpecifiersReplaced + string(character)
+	}
+	if hasStyle {
+		textWithFormatSpecifiersReplaced = textWithFormatSpecifiersReplaced + createSimpleStyleSequence(resetAnsiCode)
 	}
 	return textWithFormatSpecifiersReplaced
 }
