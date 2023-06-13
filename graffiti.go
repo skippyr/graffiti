@@ -1,9 +1,10 @@
 package graffiti
 
 import (
+	"errors"
 	"fmt"
-	"strconv"
 	"os"
+	"strconv"
 
 	"golang.org/x/term"
 )
@@ -45,14 +46,14 @@ var ansiEscapeSequencesDelimiters = []rune{
 	'm', // Style
 }
 var ansiColors = map[string]int{
-	"black": 0,
-	"red": 1,
-	"green": 2,
-	"yellow": 3,
-	"blue": 4,
+	"black":   0,
+	"red":     1,
+	"green":   2,
+	"yellow":  3,
+	"blue":    4,
 	"magenta": 5,
-	"cyan": 6,
-	"white": 7,
+	"cyan":    6,
+	"white":   7,
 }
 var formatSpecifiers = map[rune][]int{
 	'B': {boldAnsiCode, doNotExpectValue},
@@ -127,7 +128,7 @@ func removeFormatSpecifiers(text *string) string {
 	return textWithoutFormatSpecifiers
 }
 
-func createSimpleStyleSequence(ansiCode int) string {
+func createStyleSequenceWithoutValue(ansiCode int) string {
 	return fmt.Sprintf("%c[%dm", escapeCharacter, ansiCode)
 }
 
@@ -189,7 +190,7 @@ func replaceFormatSpecifiers(text *string) string {
 				isExpectingValue = formatSpecifiers[character][1]
 				ansiCode = formatSpecifiers[character][0]
 				if isExpectingValue == doNotExpectValue {
-					textWithFormatSpecifiersReplaced = textWithFormatSpecifiersReplaced + createSimpleStyleSequence(formatSpecifiers[character][0])
+					textWithFormatSpecifiersReplaced = textWithFormatSpecifiersReplaced + createStyleSequenceWithoutValue(formatSpecifiers[character][0])
 					hasStyle = true
 				}
 				continue
@@ -198,7 +199,7 @@ func replaceFormatSpecifiers(text *string) string {
 		textWithFormatSpecifiersReplaced = textWithFormatSpecifiersReplaced + string(character)
 	}
 	if hasStyle {
-		textWithFormatSpecifiersReplaced = textWithFormatSpecifiersReplaced + createSimpleStyleSequence(resetAnsiCode)
+		textWithFormatSpecifiersReplaced = textWithFormatSpecifiersReplaced + createStyleSequenceWithoutValue(resetAnsiCode)
 	}
 	return textWithFormatSpecifiersReplaced
 }
@@ -216,26 +217,30 @@ func writeToStream(stream int, text string, a ...any) (n int, err error) {
 	treatedText := fmt.Sprintf(text, a...)
 	treatedText = treatText(stream, &treatedText)
 	if stream == stdout {
-		return fmt.Printf(treatedText)
+		return fmt.Print(treatedText)
 	}
 	if stream == stderr {
-		return fmt.Fprintf(os.Stderr, treatedText)
+		return fmt.Fprint(os.Stderr, treatedText)
 	}
-	return 0, nil
+	return 0, errors.New(strconv.Itoa(stream) + " is not a valid stream")
 }
 
+// Formats and prints a text to stdout. It accepts all format specifiers of fmt.Printf and also its own to deal with styling. It returns the number of bytes written and any write error encountered.
 func Print(text string, a ...any) (n int, err error) {
 	return writeToStream(stdout, text, a...)
 }
 
+// Formats and prints a text to stdout with a new line character appended to its end. It accepts all format specifiers of fmt.Printf and also its own to deal with styling. It returns the number of bytes written and any write error encountered.
 func Println(text string, a ...any) (n int, err error) {
 	return writeToStream(stdout, text+"\n", a...)
 }
 
+// Formats and prints a text to stderr. It accepts all format specifiers of fmt.Printf and also its own to deal with styling. It returns the number of bytes written and any write error encountered.
 func Eprint(text string, a ...any) (n int, err error) {
 	return writeToStream(stderr, text, a...)
 }
 
+// Formats and prints a text to stdout with a new line character appended to its end. It accepts all format specifiers of fmt.Printf and also its own to deal with styling. It returns the number of bytes written and any write error encountered.
 func Eprintln(text string, a ...any) (n int, err error) {
 	return writeToStream(stderr, text+"\n", a...)
 }
