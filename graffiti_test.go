@@ -23,4 +23,3 @@ func TestRemoveAnsiEscapeSequences(test *testing.T) {
 		)
 	}
 }
-

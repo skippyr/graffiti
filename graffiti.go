@@ -15,12 +15,12 @@ const (
 	doNotExpectValue
 )
 const (
-	backgroundCode = 48
-	boldCode = 1
-	foregroundCode = 38
-	italicCode = 4
-	resetCode = 0
-	underlineCode = 3
+	backgroundAnsiCode = 48
+	boldAnsiCode = 1
+	foregroundAnsiCode = 38
+	italicAnsiCode = 4
+	resetAnsiCode = 0
+	underlineAnsiCode = 3
 )
 const (
 	escapeCharacter = '\x1b'
@@ -41,12 +41,12 @@ var ansiEscapeSequencesDelimiters = []rune {
 	'm', // Style
 }
 var formatSpecifiers = map[rune][]int {
-	'B': {boldCode, doNotExpectValue},
-	'F': {foregroundCode, expectsValue},
-	'I': {italicCode, doNotExpectValue},
-	'K': {backgroundCode, expectsValue},
-	'U': {underlineCode, doNotExpectValue},
-	'r': {resetCode, doNotExpectValue},
+	'B': {boldAnsiCode, doNotExpectValue},
+	'F': {foregroundAnsiCode, expectsValue},
+	'I': {italicAnsiCode, doNotExpectValue},
+	'K': {backgroundAnsiCode, expectsValue},
+	'U': {underlineAnsiCode, doNotExpectValue},
+	'r': {resetAnsiCode, doNotExpectValue},
 }
 
 func removeAnsiEscapeSequences(text *string) string {
@@ -123,28 +123,29 @@ func treatText(stream int, text *string) string {
 	return treatedText
 }
 
-func writeToStream(stream int, text string, a ...any) {
+func writeToStream(stream int, text string, a ...any) (n int, err error) {
 	treatedText := treatText(stream, &text)
 	if stream == stdout {
-		fmt.Printf(treatedText, a...)
+		return fmt.Printf(treatedText, a...)
 	}
 	if stream == stderr {
-		fmt.Fprintf(os.Stderr, treatedText, a...)
+		return fmt.Fprintf(os.Stderr, treatedText, a...)
 	}
+	return 0, nil
 }
 
-func Print(text string, a ...any) {
-	writeToStream(stdout, text, a...)
+func Print(text string, a ...any) (n int, err error) {
+	return writeToStream(stdout, text, a...)
 }
 
-func Println(text string, a ...any) {
-	writeToStream(stdout, text + "\n", a...)
+func Println(text string, a ...any) (n int, err error) {
+	return writeToStream(stdout, text + "\n", a...)
 }
 
-func EPrint(text string, a ...any) {
-	writeToStream(stderr, text, a...)
+func EPrint(text string, a ...any) (n int, err error) {
+	return writeToStream(stderr, text, a...)
 }
 
-func EPrintln(text string, a ...any) {
-	writeToStream(stderr, text + "\n", a...)
+func EPrintln(text string, a ...any) (n int, err error) {
+	return writeToStream(stderr, text + "\n", a...)
 }
