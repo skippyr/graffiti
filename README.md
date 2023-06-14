@@ -108,9 +108,14 @@ go run main.go
 
 To see if the sequences will be removed, let's check out what will be put in a file if the output of the program is redirected:
 
-```bash
-go run main.go &>output.txt; cat output.txt
-```
+* On Linux:
+	```bash
+	go run main.go &>output.txt; cat output.txt
+	```
+* On Windows:
+	```
+	go run main.go > output.txt 2>&1 & more output.txt
+	```
 
 ![](images/preview_pipeline.png)
 
