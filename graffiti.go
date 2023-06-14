@@ -26,10 +26,14 @@ const (
 	formatSpecifierPrefixCharacter = '@'
 	formatSpecifierOpenDelimiter   = '{'
 	formatSpecifierCloseDelimiter  = '}'
+	ansiEscapeSequenceOpenDelimiter = '['
 )
 const greatestFormatSpecifierValue = "magenta"
 
 var ansiEscapeSequencesDelimiters = []rune{
+	// A list of common ANSI escape sequences can be found at:
+	//    * https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
+	//    * https://en.wikipedia.org/wiki/ANSI_escape_code
 	'A', // Move cursor up
 	'B', // Move cursor down
 	'C', // Move cursor right
@@ -65,7 +69,7 @@ var formatSpecifiers = map[rune][]int{
 
 // Treats and returns a string with all ANSI escape sequences that can change styles, cursor position and clear contents removed.
 func removeAnsiEscapeSequences(text *string) string {
-	textWithoutStyleAndCursorSequences := ""
+	treatedText := ""
 	hasUsedEscapeCharacter := false
 	isEscaping := false
 	for _, character := range *text {
@@ -78,14 +82,13 @@ func removeAnsiEscapeSequences(text *string) string {
 			}
 			continue
 		}
-		isEscaping = hasUsedEscapeCharacter && character == '['
+		isEscaping = hasUsedEscapeCharacter && character == ansiEscapeSequenceOpenDelimiter
 		hasUsedEscapeCharacter = character == escapeCharacter
-		if hasUsedEscapeCharacter || isEscaping {
-			continue
+		if !isEscaping && !hasUsedEscapeCharacter {
+			treatedText += string(character)
 		}
-		textWithoutStyleAndCursorSequences = textWithoutStyleAndCursorSequences + string(character)
 	}
-	return textWithoutStyleAndCursorSequences
+	return treatedText
 }
 
 func createStyleSequenceWithoutValue(ansiCode int) string {
