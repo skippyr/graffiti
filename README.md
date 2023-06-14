@@ -32,7 +32,7 @@ Graffiti offers some functions to help you:
 
 * `graffiti.Print`: prints to `stdout`.
 * `graffiti.Println`: prints to `stdout` and appends a new line character in the end.
-* `graffiti.Eprintln`: prints to `stderr`.
+* `graffiti.Eprint`: prints to `stderr`.
 * `graffiti.Eprintln`: prints to `stderr` and appends a new line character in the end.
 
 Those functions are wrapper of the `fmt.Sprintf` function, which means that you can them to format data just like you normally do with the `fmt.Printf`, also returning the same data types. The difference is that they can interpret new format specifiers to apply styles.
