@@ -159,18 +159,13 @@ func replaceFormatSpecifiers(text *string) string {
 	return textWithFormatSpecifiersReplaced
 }
 
-func treatText(stream *os.File, text *string) string {
-	treatedText := removeAnsiEscapeSequences(text)
-	treatedText = replaceFormatSpecifiers(&treatedText)
-	if !term.IsTerminal(int(stream.Fd())) {
-		return removeAnsiEscapeSequences(&treatedText)
-	}
-	return treatedText
-}
-
 func writeToStream(stream *os.File, text string, a ...any) (n int, err error) {
 	treatedText := fmt.Sprintf(text, a...)
-	treatedText = treatText(stream, &treatedText)
+	treatedText = removeAnsiEscapeSequences(&text)
+	treatedText = replaceFormatSpecifiers(&treatedText)
+	if !term.IsTerminal(int(stream.Fd())) {
+		treatedText = removeAnsiEscapeSequences(&treatedText)
+	}
 	return fmt.Fprint(stream, treatedText)
 }
 
