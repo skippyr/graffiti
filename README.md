@@ -2,13 +2,25 @@
 
 ## Starting Point
 
-Graffiti is a Go library to ease pretty print to standard streams.
+Graffiti is a Go module to ease pretty print to standard streams.
 
-This library is not cross-platform: styles are only be applied in UNIX-like operating systems, while on Windows, they are removed.
+This module is not cross-platform: styles are only be applied in UNIX-like operating systems, while on Windows, they are removed.
 
 ## Installation
 
-It is not available for production yet.
+* Inside of your project's directory, download and include this module.
+
+	```bash
+	go get github.com/skippyr/graffiti
+	```
+
+* Import it in your code.
+
+	```go
+	import (
+		"github.com/skippyr/graffiti"
+	)
+	```
 
 ## Usage
 
@@ -28,6 +40,8 @@ Graffiti offers some functions to help you:
 Those functions are wrapper of the `fmt.Sprintf` function, which means that you can them to format data just like you normally do with the `fmt.Printf`, also returning the same data types. The difference is that they can interpret new format specifiers to apply styles.
 
 They will also automatically replace those format specifiers with styles sequences, or will remove them automatically of the string if it detects that the stream is not a terminal.
+
+To avoid conflicts with the sequences, those functions will remove ANSI sequences that apply styles or move the cursor that you might be placed in the string.
 
 ### Format Specifiers
 
