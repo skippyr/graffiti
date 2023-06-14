@@ -30,15 +30,19 @@ const (
 const greatestFormatSpecifierValue = "magenta"
 
 var ansiEscapeSequencesDelimiters = []rune{
-	'H', // Move cursor
-	'J', // Clear screen
 	'A', // Move cursor up
 	'B', // Move cursor down
 	'C', // Move cursor right
 	'D', // Move cursor left
 	'E', // Move cursor to beggining of next line
 	'F', // Move cursor to beggining of previous line
+	'H', // Move cursor
+	'J', // Clear screen
+	'K', // Clear line
+	'M', // Move cursor one line up
 	'm', // Style
+	's', // Save cursor position
+	'u', // Restore cursor to saved position
 }
 var ansiColors = map[string]int{
 	"black":   0,
@@ -59,6 +63,7 @@ var formatSpecifiers = map[rune][]int{
 	'r': {resetAnsiCode, doNotExpectValue},
 }
 
+// Treats and returns a string with all ANSI escape sequences that can change styles, cursor position and clear contents removed.
 func removeAnsiEscapeSequences(text *string) string {
 	textWithoutStyleAndCursorSequences := ""
 	hasUsedEscapeCharacter := false
