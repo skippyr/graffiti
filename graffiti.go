@@ -102,7 +102,7 @@ func createStyleSequenceWithColor(ansiCode int, ansiColor int) string {
 	return fmt.Sprintf("%c[%d;5;%dm", escapeCharacter, ansiCode, ansiColor)
 }
 
-func replaceFormatSpecifiers(text *string) string {
+func replaceFormatSpecifiers(text *string, isToAddNewLine bool) string {
 	textWithFormatSpecifiersReplaced := ""
 	isFormatting := false
 	isReceivingValue := false
@@ -156,13 +156,21 @@ func replaceFormatSpecifiers(text *string) string {
 	if hasStyle {
 		textWithFormatSpecifiersReplaced = textWithFormatSpecifiersReplaced + createStyleSequenceWithoutValue(resetAnsiCode)
 	}
+	if isToAddNewLine {
+		textWithFormatSpecifiersReplaced = textWithFormatSpecifiersReplaced + "\n"
+	}
 	return textWithFormatSpecifiersReplaced
 }
 
-func writeToStream(stream *os.File, text string, a ...any) (n int, err error) {
-	treatedText := fmt.Sprintf(text, a...)
+func writeToStream(
+	stream *os.File,
+	text string,
+	isToAddNewLine bool,
+	argumentsToFormat ...any,
+) (n int, err error) {
+	treatedText := fmt.Sprintf(text, argumentsToFormat...)
 	treatedText = removeAnsiEscapeSequences(&text)
-	treatedText = replaceFormatSpecifiers(&treatedText)
+	treatedText = replaceFormatSpecifiers(&treatedText, isToAddNewLine)
 	if !term.IsTerminal(int(stream.Fd())) {
 		treatedText = removeAnsiEscapeSequences(&treatedText)
 	}
@@ -170,21 +178,21 @@ func writeToStream(stream *os.File, text string, a ...any) (n int, err error) {
 }
 
 // Formats and prints a text to stdout. It accepts all format specifiers of fmt.Printf and also its own to deal with styling. It returns the number of bytes written and any write error encountered.
-func Print(text string, a ...any) (n int, err error) {
-	return writeToStream(os.Stdout, text, a...)
+func Print(text string, argumentsToFormat ...any) (bytesWritten int, err error) {
+	return writeToStream(os.Stdout, text, false, argumentsToFormat...)
 }
 
 // Formats and prints a text to stdout with a new line character appended to its end. It accepts all format specifiers of fmt.Printf and also its own to deal with styling. It returns the number of bytes written and any write error encountered.
-func Println(text string, a ...any) (n int, err error) {
-	return writeToStream(os.Stdout, text+"\n", a...)
+func Println(text string, argumentsToFormat ...any) (bytesWritten int, err error) {
+	return writeToStream(os.Stdout, text, true, argumentsToFormat...)
 }
 
 // Formats and prints a text to stderr. It accepts all format specifiers of fmt.Printf and also its own to deal with styling. It returns the number of bytes written and any write error encountered.
-func Eprint(text string, a ...any) (n int, err error) {
-	return writeToStream(os.Stderr, text, a...)
+func Eprint(text string, argumentsToFormat ...any) (bytesWritten int, err error) {
+	return writeToStream(os.Stderr, text, false, argumentsToFormat...)
 }
 
 // Formats and prints a text to stderr with a new line character appended to its end. It accepts all format specifiers of fmt.Printf and also its own to deal with styling. It returns the number of bytes written and any write error encountered.
-func Eprintln(text string, a ...any) (n int, err error) {
-	return writeToStream(os.Stderr, text+"\n", a...)
+func Eprintln(text string, argumentsToFormat ...any) (bytesWritten int, err error) {
+	return writeToStream(os.Stderr, text, true, argumentsToFormat...)
 }
