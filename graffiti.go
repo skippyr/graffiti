@@ -164,35 +164,35 @@ func replaceFormatSpecifiers(text *string, isToAddNewLine bool) string {
 
 func writeToStream(
 	stream *os.File,
-	text string,
+	text *string,
 	isToAddNewLine bool,
 	argumentsToFormat ...any,
-) (n int, err error) {
-	treatedText := fmt.Sprintf(text, argumentsToFormat...)
-	treatedText = removeAnsiEscapeSequences(&text)
-	treatedText = replaceFormatSpecifiers(&treatedText, isToAddNewLine)
+) (bytesWritten int, err error) {
+	*text = fmt.Sprintf(*text, argumentsToFormat...)
+	*text = removeAnsiEscapeSequences(text)
+	*text = replaceFormatSpecifiers(text, isToAddNewLine)
 	if !term.IsTerminal(int(stream.Fd())) {
-		treatedText = removeAnsiEscapeSequences(&treatedText)
+		*text = removeAnsiEscapeSequences(text)
 	}
-	return fmt.Fprint(stream, treatedText)
+	return fmt.Fprint(stream, *text)
 }
 
 // Formats and prints a text to stdout. It accepts all format specifiers of fmt.Printf and also its own to deal with styling. It returns the number of bytes written and any write error encountered.
 func Print(text string, argumentsToFormat ...any) (bytesWritten int, err error) {
-	return writeToStream(os.Stdout, text, false, argumentsToFormat...)
+	return writeToStream(os.Stdout, &text, false, argumentsToFormat...)
 }
 
 // Formats and prints a text to stdout with a new line character appended to its end. It accepts all format specifiers of fmt.Printf and also its own to deal with styling. It returns the number of bytes written and any write error encountered.
 func Println(text string, argumentsToFormat ...any) (bytesWritten int, err error) {
-	return writeToStream(os.Stdout, text, true, argumentsToFormat...)
+	return writeToStream(os.Stdout, &text, true, argumentsToFormat...)
 }
 
 // Formats and prints a text to stderr. It accepts all format specifiers of fmt.Printf and also its own to deal with styling. It returns the number of bytes written and any write error encountered.
 func Eprint(text string, argumentsToFormat ...any) (bytesWritten int, err error) {
-	return writeToStream(os.Stderr, text, false, argumentsToFormat...)
+	return writeToStream(os.Stderr, &text, false, argumentsToFormat...)
 }
 
 // Formats and prints a text to stderr with a new line character appended to its end. It accepts all format specifiers of fmt.Printf and also its own to deal with styling. It returns the number of bytes written and any write error encountered.
 func Eprintln(text string, argumentsToFormat ...any) (bytesWritten int, err error) {
-	return writeToStream(os.Stderr, text, true, argumentsToFormat...)
+	return writeToStream(os.Stderr, &text, true, argumentsToFormat...)
 }
