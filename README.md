@@ -4,15 +4,7 @@
 
 Graffiti is a Go library to ease pretty print to standard streams.
 
-It exists to solve a very common and annoying problem: coloring and formatting the output of programs. This is a hard task, as it envolves dealing with ANSI escape sequences that are hard to debug, as they are invisible when printed.
-
-Not just that, but if your program is piped to other program or file, all the ANSI sequences will remain unless you deal with them, which will make the output be hard to parse and understand.
-
-To solve it, Graffiti brings up new fmt.Printf-like functions that can understand all format specifiers fmt.Printf can as well new format specifiers to apply styles and print strings into standard streams.
-
-Those functions will automatically parse, add or remove ANSI sequences as well their own format specifiers based if the stream is being piped or not, so you can apply styles easily.
-
-This library is not cross-platform: styles will only be applied in UNIX-like operating systems, while on Windows, they will be removed.
+This library is not cross-platform: styles are only be applied in UNIX-like operating systems, while on Windows, they are removed.
 
 ## Installation
 
@@ -20,20 +12,24 @@ It is not available for production yet.
 
 ## Usage
 
+Graffiti exists to solve a very common and annoying problem: coloring and formatting the output of programs. This is a hard task, as it envolves dealing with ANSI escape sequences that are hard to debug, as they are invisible when printed.
+
+Not just that, but if your program is piped to other program or file, all the ANSI sequences will remain unless you deal to remove them, which will make the output be hard to parse and understand.
+
 ### Functions
 
-Graffiti offers some functions for you do to your work:
+Graffiti offers some functions to help you:
 
 * `graffiti.Print`: prints to `stdout`.
 * `graffiti.Println`: prints to `stdout` and appends a new line character in the end.
 * `graffiti.Eprintln`: prints to `stderr`.
 * `graffiti.Eprintln`: prints to `stderr` and appends a new line character in the end.
 
-Those functions are wrapper of the `fmt.Sprintf` function, which means that you can them to format data just like you normally do with the `fmt.Printf`. The difference is that they can interpret new format specifiers to apply styles.
+Those functions are wrapper of the `fmt.Sprintf` function, which means that you can them to format data just like you normally do with the `fmt.Printf`, also returning the same data types. The difference is that they can interpret new format specifiers to apply styles.
 
-They will automatically replace those format specifiers with styles sequences, or will remove them automatically of the string if it detects that the stream is not a terminal.
+They will also automatically replace those format specifiers with styles sequences, or will remove them automatically of the string if it detects that the stream is not a terminal.
 
-### Formatter Specifiers
+### Format Specifiers
 
 * `@F{<color>}`: changes the foreground color.
 * `@K{<color>}`: changes the background color.
@@ -43,9 +39,9 @@ They will automatically replace those format specifiers with styles sequences, o
 * `@@`: uses an actual `@` character.
 * `@r`: removes all styles applied.
 
-The `<color>` placeholder must be replaced by the value of a color of the 8 bits palette (values from 0 to 255 - full palette can be found online) or the name of a color of the 3 bits palette:
+The `<color>` placeholder must be replaced by the value of a color of the 8 bits palette (values from `0` to `255` - full palette can be found online) or the name of a color of the 3 bits palette:
 
-* `black`: same as value `1`.
+* `black`: same as value `0`.
 * `red`: same as value `1`.
 * `green`: same as value `2`.
 * `yellow`: same as value `3`.
@@ -60,9 +56,9 @@ You do not need to reset your styles in the end of the string, as Graffiti autom
 
 Old terminal emulators, have limited capabilities when rendering fonts and colors. If you want your program to support them, avoid using bold and italic, and prefer to use only colors of the 3 bits palette.
 
-Some terminal emulators, for instance, st, konsole and linux (the default virtual console of Linux), might render bold or italic with a brighter color.
+Some terminal emulators, for instance, `st`, `konsole` and `linux` (the default virtual console of Linux), might render bold or italic with a brighter color.
 
-### Examples
+### Example
 
 Let's create a simple program to test Graffiti's capabilities.
 
@@ -105,6 +101,8 @@ go run main.go &>output.txt; cat output.txt
 ```
 
 ![](images/preview_pipeline.png)
+
+As can be seen, all styles are gone as expected.
 
 ## Issues
 

@@ -240,7 +240,7 @@ func Eprint(text string, a ...any) (n int, err error) {
 	return writeToStream(stderr, text, a...)
 }
 
-// Formats and prints a text to stdout with a new line character appended to its end. It accepts all format specifiers of fmt.Printf and also its own to deal with styling. It returns the number of bytes written and any write error encountered.
+// Formats and prints a text to stderr with a new line character appended to its end. It accepts all format specifiers of fmt.Printf and also its own to deal with styling. It returns the number of bytes written and any write error encountered.
 func Eprintln(text string, a ...any) (n int, err error) {
 	return writeToStream(stderr, text+"\n", a...)
 }
