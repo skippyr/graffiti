@@ -8,20 +8,17 @@ import (
 	"golang.org/x/term"
 )
 
+type FormatSpecifier struct {
+	character        rune
+	ansiStyleCode    int
+	doesExpectsColor bool
+}
+
 const (
-	expectsValue = iota
-	doNotExpectValue
-)
-const (
-	backgroundAnsiCode   = 48
-	boldAnsiCode         = 1
-	foregroundAnsiCode   = 38
-	italicAnsiCode       = 3
-	resetAnsiCode        = 0
-	underlineAnsiCode    = 4
-	invalidAnsiColorCode = -1
+	resetAnsiStyleCode   = 0
+	invalidAnsiCode      = -1
 	minimumAnsiColorCode = 0
-	maximumAnsiColorCode = 1
+	maximumAnsiColorCode = 255
 
 	escapeCharacter                 = '\x1b'
 	formatSpecifierPrefixCharacter  = '@'
@@ -29,7 +26,7 @@ const (
 	formatSpecifierCloseDelimiter   = '}'
 	ansiEscapeSequenceOpenDelimiter = '['
 
-	greatestFormatSpecifierValue = "magenta"
+	greatestFormatSpecifierColor = "magenta"
 )
 
 var ansiEscapeSequencesDelimiters = []rune{
@@ -60,16 +57,45 @@ var threeBitsAnsiColors = []string{
 	"cyan",
 	"white",
 }
-var formatSpecifiers = map[rune][]int{
-	'B': {boldAnsiCode, doNotExpectValue},
-	'F': {foregroundAnsiCode, expectsValue},
-	'I': {italicAnsiCode, doNotExpectValue},
-	'K': {backgroundAnsiCode, expectsValue},
-	'U': {underlineAnsiCode, doNotExpectValue},
-	'r': {resetAnsiCode, doNotExpectValue},
+var formatSpecifiers = []FormatSpecifier{
+	{
+		// Bold
+		character:        'B',
+		ansiStyleCode:    1,
+		doesExpectsColor: false,
+	},
+	{
+		// Italic
+		character:        'I',
+		ansiStyleCode:    3,
+		doesExpectsColor: false,
+	},
+	{
+		// Underline
+		character:        'U',
+		ansiStyleCode:    4,
+		doesExpectsColor: false,
+	},
+	{
+		// Foreground
+		character:        'F',
+		ansiStyleCode:    38,
+		doesExpectsColor: true,
+	},
+	{
+		// Background
+		character:        'K',
+		ansiStyleCode:    48,
+		doesExpectsColor: true,
+	},
+	{
+		// Reset
+		character:        'r',
+		ansiStyleCode:    resetAnsiStyleCode,
+		doesExpectsColor: false,
+	},
 }
 
-// Treats and returns a string with all ANSI escape sequences that can change styles, cursor position and clear contents removed.
 func removeAnsiEscapeSequences(text *string) string {
 	treatedText := ""
 	hasUsedEscapeCharacter := false
@@ -93,10 +119,6 @@ func removeAnsiEscapeSequences(text *string) string {
 	return treatedText
 }
 
-func createStyleSequenceWithoutValue(ansiCode int) string {
-	return fmt.Sprintf("%c[%dm", escapeCharacter, ansiCode)
-}
-
 func convertStringToAnsiColorCode(ansiColorAsString *string) int {
 	for threeBitsAnsiColorCode, threeBitsAnsiColor := range threeBitsAnsiColors {
 		if *ansiColorAsString == threeBitsAnsiColor {
@@ -105,43 +127,47 @@ func convertStringToAnsiColorCode(ansiColorAsString *string) int {
 	}
 	ansiColor, err := strconv.Atoi(*ansiColorAsString)
 	if err != nil || ansiColor < minimumAnsiColorCode || ansiColor > maximumAnsiColorCode {
-		return invalidAnsiColorCode
+		return invalidAnsiCode
 	}
 	return ansiColor
 }
 
-func createStyleSequenceWithColor(ansiCode int, ansiColor int) string {
-	return fmt.Sprintf("%c[%d;5;%dm", escapeCharacter, ansiCode, ansiColor)
+func createAnsiStyleSequence(ansiStyleCode int) string {
+	return fmt.Sprintf("%c[%dm", escapeCharacter, ansiStyleCode)
+}
+
+func createAnsiStyleSequenceWithColor(ansiStyleCode int, ansiColor int) string {
+	return fmt.Sprintf("%c[%d;5;%dm", escapeCharacter, ansiStyleCode, ansiColor)
 }
 
 func replaceFormatSpecifiers(text *string, isToAddNewLine bool) string {
-	textWithFormatSpecifiersReplaced := ""
-	isFormatting := false
-	isReceivingValue := false
-	isExpectingValue := doNotExpectValue
-	ansiCode := 0
-	value := ""
+	ansiStyleCode := invalidAnsiCode
+	color := ""
 	hasStyle := false
+	isExpectingColor := false
+	isFormatting := false
+	isReadingColor := false
+	treatedText := ""
 	for _, character := range *text {
-		if isReceivingValue {
-			if character == ' ' || character == formatSpecifierCloseDelimiter || len(value) > len(greatestFormatSpecifierValue) {
-				ansiColorCode := convertStringToAnsiColorCode(&value)
-				if ansiColorCode != invalidAnsiColorCode {
-					textWithFormatSpecifiersReplaced = textWithFormatSpecifiersReplaced + createStyleSequenceWithColor(ansiCode, ansiColorCode)
+		if isReadingColor {
+			if character == ' ' || character == formatSpecifierCloseDelimiter || len(color) > len(greatestFormatSpecifierColor) {
+				ansiColorCode := convertStringToAnsiColorCode(&color)
+				if ansiColorCode != invalidAnsiCode {
+					treatedText += createAnsiStyleSequenceWithColor(ansiStyleCode, ansiColorCode)
 					hasStyle = true
 				}
-				isReceivingValue = false
-				value = ""
-				ansiCode = 0
+				isReadingColor = false
+				color = ""
+				ansiStyleCode = invalidAnsiCode
 			} else {
-				value = value + string(character)
+				color += string(character)
 			}
 			continue
 		}
-		if isExpectingValue == expectsValue {
-			isExpectingValue = doNotExpectValue
+		if isExpectingColor {
+			isExpectingColor = false
 			if character == formatSpecifierOpenDelimiter {
-				isReceivingValue = true
+				isReadingColor = true
 				continue
 			}
 		}
@@ -153,33 +179,35 @@ func replaceFormatSpecifiers(text *string, isToAddNewLine bool) string {
 		}
 		if isFormatting {
 			isFormatting = false
-			if len(formatSpecifiers[character]) > 0 {
-				isExpectingValue = formatSpecifiers[character][1]
-				ansiCode = formatSpecifiers[character][0]
-				if isExpectingValue == doNotExpectValue {
-					textWithFormatSpecifiersReplaced = textWithFormatSpecifiersReplaced + createStyleSequenceWithoutValue(formatSpecifiers[character][0])
-					hasStyle = true
+			isFormatSpecifier := false
+			for _, formatSpecifier := range formatSpecifiers {
+				if character == formatSpecifier.character {
+					isFormatSpecifier = true
+					isExpectingColor = formatSpecifier.doesExpectsColor
+					ansiStyleCode = formatSpecifier.ansiStyleCode
+					if !isExpectingColor {
+						treatedText += createAnsiStyleSequence(formatSpecifier.ansiStyleCode)
+						hasStyle = true
+					}
+					break
 				}
+			}
+			if isFormatSpecifier {
 				continue
 			}
 		}
-		textWithFormatSpecifiersReplaced = textWithFormatSpecifiersReplaced + string(character)
+		treatedText += string(character)
 	}
 	if hasStyle {
-		textWithFormatSpecifiersReplaced = textWithFormatSpecifiersReplaced + createStyleSequenceWithoutValue(resetAnsiCode)
+		treatedText += createAnsiStyleSequence(resetAnsiStyleCode)
 	}
 	if isToAddNewLine {
-		textWithFormatSpecifiersReplaced = textWithFormatSpecifiersReplaced + "\n"
+		treatedText += "\n"
 	}
-	return textWithFormatSpecifiersReplaced
+	return treatedText
 }
 
-func writeToStream(
-	stream *os.File,
-	text *string,
-	isToAddNewLine bool,
-	argumentsToFormat ...any,
-) (bytesWritten int, err error) {
+func writeToStream(stream *os.File, text *string, isToAddNewLine bool, argumentsToFormat ...any) (bytesWritten int, err error) {
 	*text = fmt.Sprintf(*text, argumentsToFormat...)
 	*text = removeAnsiEscapeSequences(text)
 	*text = replaceFormatSpecifiers(text, isToAddNewLine)
