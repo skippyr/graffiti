@@ -13,27 +13,29 @@ const (
 	doNotExpectValue
 )
 const (
-	backgroundAnsiCode = 48
-	boldAnsiCode       = 1
-	foregroundAnsiCode = 38
-	italicAnsiCode     = 3
-	resetAnsiCode      = 0
-	underlineAnsiCode  = 4
-	invalidAnsiColor   = -1
-)
-const (
-	escapeCharacter                = '\x1b'
-	formatSpecifierPrefixCharacter = '@'
-	formatSpecifierOpenDelimiter   = '{'
-	formatSpecifierCloseDelimiter  = '}'
+	backgroundAnsiCode   = 48
+	boldAnsiCode         = 1
+	foregroundAnsiCode   = 38
+	italicAnsiCode       = 3
+	resetAnsiCode        = 0
+	underlineAnsiCode    = 4
+	invalidAnsiColorCode = -1
+	minimumAnsiColorCode = 0
+	maximumAnsiColorCode = 1
+
+	escapeCharacter                 = '\x1b'
+	formatSpecifierPrefixCharacter  = '@'
+	formatSpecifierOpenDelimiter    = '{'
+	formatSpecifierCloseDelimiter   = '}'
 	ansiEscapeSequenceOpenDelimiter = '['
+
+	greatestFormatSpecifierValue = "magenta"
 )
-const greatestFormatSpecifierValue = "magenta"
 
 var ansiEscapeSequencesDelimiters = []rune{
 	// A list of common ANSI escape sequences can be found at:
-	//    * https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
-	//    * https://en.wikipedia.org/wiki/ANSI_escape_code
+	//   https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
+	//   https://en.wikipedia.org/wiki/ANSI_escape_code
 	'A', // Move cursor up
 	'B', // Move cursor down
 	'C', // Move cursor right
@@ -48,15 +50,15 @@ var ansiEscapeSequencesDelimiters = []rune{
 	's', // Save cursor position
 	'u', // Restore cursor to saved position
 }
-var ansiColors = map[string]int{
-	"black":   0,
-	"red":     1,
-	"green":   2,
-	"yellow":  3,
-	"blue":    4,
-	"magenta": 5,
-	"cyan":    6,
-	"white":   7,
+var threeBitsAnsiColors = []string{
+	"black",
+	"red",
+	"green",
+	"yellow",
+	"blue",
+	"magenta",
+	"cyan",
+	"white",
 }
 var formatSpecifiers = map[rune][]int{
 	'B': {boldAnsiCode, doNotExpectValue},
@@ -95,13 +97,15 @@ func createStyleSequenceWithoutValue(ansiCode int) string {
 	return fmt.Sprintf("%c[%dm", escapeCharacter, ansiCode)
 }
 
-func convertStringToAnsiColor(value *string) int {
-	if ansiColors[*value] != 0 || (ansiColors[*value] == 0 && *value == "black") {
-		return ansiColors[*value]
+func convertStringToAnsiColorCode(ansiColorAsString *string) int {
+	for threeBitsAnsiColorCode, threeBitsAnsiColor := range threeBitsAnsiColors {
+		if *ansiColorAsString == threeBitsAnsiColor {
+			return threeBitsAnsiColorCode
+		}
 	}
-	ansiColor, err := strconv.Atoi(*value)
-	if err != nil || ansiColor < 0 || ansiColor > 255 {
-		return invalidAnsiColor
+	ansiColor, err := strconv.Atoi(*ansiColorAsString)
+	if err != nil || ansiColor < minimumAnsiColorCode || ansiColor > maximumAnsiColorCode {
+		return invalidAnsiColorCode
 	}
 	return ansiColor
 }
@@ -121,9 +125,9 @@ func replaceFormatSpecifiers(text *string, isToAddNewLine bool) string {
 	for _, character := range *text {
 		if isReceivingValue {
 			if character == ' ' || character == formatSpecifierCloseDelimiter || len(value) > len(greatestFormatSpecifierValue) {
-				ansiColor := convertStringToAnsiColor(&value)
-				if ansiColor != invalidAnsiColor {
-					textWithFormatSpecifiersReplaced = textWithFormatSpecifiersReplaced + createStyleSequenceWithColor(ansiCode, ansiColor)
+				ansiColorCode := convertStringToAnsiColorCode(&value)
+				if ansiColorCode != invalidAnsiColorCode {
+					textWithFormatSpecifiersReplaced = textWithFormatSpecifiersReplaced + createStyleSequenceWithColor(ansiCode, ansiColorCode)
 					hasStyle = true
 				}
 				isReceivingValue = false
