@@ -88,46 +88,6 @@ func removeAnsiEscapeSequences(text *string) string {
 	return textWithoutStyleAndCursorSequences
 }
 
-func removeFormatSpecifiers(text *string) string {
-	textWithoutFormatSpecifiers := ""
-	isFormatting := false
-	isExpectingValue := doNotExpectValue
-	isReceivingValue := false
-	valueLength := 0
-	for _, character := range *text {
-		if isReceivingValue {
-			if character == ' ' || character == formatSpecifierCloseDelimiter || valueLength > len(greatestFormatSpecifierValue) {
-				isReceivingValue = false
-				valueLength = 0
-			}
-			valueLength++
-			continue
-		}
-		if isExpectingValue == expectsValue {
-			isExpectingValue = doNotExpectValue
-			if character == formatSpecifierOpenDelimiter {
-				isReceivingValue = true
-				continue
-			}
-		}
-		if character == formatSpecifierPrefixCharacter {
-			isFormatting = !isFormatting
-			if isFormatting {
-				continue
-			}
-		}
-		if isFormatting {
-			isFormatting = false
-			if len(formatSpecifiers[character]) > 0 {
-				isExpectingValue = formatSpecifiers[character][1]
-				continue
-			}
-		}
-		textWithoutFormatSpecifiers = textWithoutFormatSpecifiers + string(character)
-	}
-	return textWithoutFormatSpecifiers
-}
-
 func createStyleSequenceWithoutValue(ansiCode int) string {
 	return fmt.Sprintf("%c[%dm", escapeCharacter, ansiCode)
 }
@@ -206,10 +166,10 @@ func replaceFormatSpecifiers(text *string) string {
 
 func treatText(stream int, text *string) string {
 	treatedText := removeAnsiEscapeSequences(text)
-	if !term.IsTerminal(stream) {
-		return removeFormatSpecifiers(&treatedText)
-	}
 	treatedText = replaceFormatSpecifiers(&treatedText)
+	if !term.IsTerminal(stream) {
+		return removeAnsiEscapeSequences(&treatedText)
+	}
 	return treatedText
 }
 
