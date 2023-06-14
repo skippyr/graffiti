@@ -1,12 +1,14 @@
 package graffiti
 
 import (
+	"os"
+
 	"golang.org/x/sys/windows"
 )
 
 func init() {
 	var consoleMode uint32
-	stdoutHandle := windows.Handle(stdout)
+	stdoutHandle := windows.Handle(os.Stdout.Fd())
 	if windows.GetConsoleMode(stdoutHandle, &consoleMode) != nil {
 		return
 	}
