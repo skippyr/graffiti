@@ -4,8 +4,6 @@
 
 Graffiti is a Go module to ease pretty print to standard streams.
 
-This module is not cross-platform: styles are only be applied in UNIX-like operating systems, while on Windows, they are removed.
-
 ## Installation
 
 * Inside of your project's directory, download and include this module.
