@@ -113,7 +113,7 @@ To see if the sequences will be removed, let's check out what will be put in a f
 	go run main.go &>output.txt; cat output.txt
 	```
 * On Windows:
-	```
+	```powershell
 	go run main.go > output.txt 2>&1 & more output.txt
 	```
 
