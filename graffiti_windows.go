@@ -18,14 +18,7 @@ func allowEscapingAnsiSequencesOnWindows() {
 	if windows.GetConsoleMode(stdoutHandle, &consoleMode) != nil {
 		return
 	}
-	isProcessingOutputAsAnsi := consoleMode&windows.ENABLE_PROCESSED_OUTPUT != 0
-	if !isProcessingOutputAsAnsi {
-		windows.SetConsoleMode(stdoutHandle, consoleMode|windows.ENABLE_PROCESSED_OUTPUT)
-	}
-	isEscapingAnsiSequences := consoleMode&windows.ENABLE_VIRTUAL_TERMINAL_PROCESSING != 0
-	if !isEscapingAnsiSequences {
-		windows.SetConsoleMode(stdoutHandle, consoleMode|windows.ENABLE_VIRTUAL_TERMINAL_PROCESSING)
-	}
+	windows.SetConsoleMode(stdoutHandle, consoleMode|windows.ENABLE_PROCESSED_OUTPUT|windows.ENABLE_VIRTUAL_TERMINAL_PROCESSING)
 }
 
 func init() {
