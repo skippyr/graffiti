@@ -24,7 +24,7 @@ Graffiti is a Go module to ease pretty print to standard streams.
 
 Graffiti exists to solve a very common and annoying problem: coloring and formatting the output of programs. This is a hard task, as it envolves dealing with ANSI escape sequences that are hard to debug, as they are invisible when printed.
 
-Not just that, but if your program is piped to other program or file, all the ANSI sequences will remain unless you deal to remove them, which will make the output be hard to parse and understand.
+Not just that, but if your program is piped to other program or redirected to a file, all the ANSI sequences will remain unless you deal to remove them, which will make the output be hard to parse and understand.
 
 ### Functions
 
@@ -35,23 +35,25 @@ Graffiti offers some functions to help you:
 * `graffiti.Eprint`: prints to `stderr`.
 * `graffiti.Eprintln`: prints to `stderr` and appends a new line character in the end.
 
-Those functions are wrapper of the `fmt.Sprintf` function, which means that you can them to format data just like you normally do with the `fmt.Printf`, also returning the same data types. The difference is that they can interpret new format specifiers to apply styles.
+Those functions are wrappers of the `fmt.Sprintf` function, which means that you can them to format data just like you would normally do with the `fmt.Printf` function. It also returns the same data types. The difference is that they can interpret new format specifiers to apply styles.
 
-They will also automatically replace those format specifiers with styles sequences, or will remove them automatically of the string if it detects that the stream is not a terminal.
+They will automatically replace those format specifiers with styles sequences, or will remove them automatically of the output if they detect that the stream is not a terminal.
 
-To avoid conflicts with the sequences, those functions will remove ANSI sequences that apply styles or move the cursor that you might be placed in the string.
+To avoid conflicts with some ANSI sequences, those functions will remove ANSI sequences that apply styles, clear the screen or move the cursor from the string you use as parameter.
 
 ### Format Specifiers
 
+These are the new format specifiers, that you can use to apply styles. The text placed after one of them will have their style modified:
+
 * `@F{<color>}`: changes the foreground color.
 * `@K{<color>}`: changes the background color.
-* `@B`: uses bold. Only visible if font contains bold characters.
-* `@I`: uses italic. Only visible if font contains italic characters.
+* `@B`: uses bold. Only visible if using a font that contains bold characters. Some terminal emulators might render it using brighter colors.
+* `@I`: uses italic. Only visible if using a font that contains italic characters. Some terminal emulators might not render it.
 * `@U`: uses underline.
-* `@@`: uses an actual `@` character.
 * `@r`: removes all styles applied.
+* `@@`: uses an actual `@` character.
 
-The `<color>` placeholder must be replaced by the value of a color of the 8 bits palette (values from `0` to `255` - full palette can be found online) or the name of a color of the 3 bits palette:
+The `<color>` placeholder must be replaced by the value of a color of the 8 bits palette (values from `0` to `255` - images of the full palette can be found online and used as reference) or the name of a color of the 3 bits palette:
 
 * `black`: same as value `0`.
 * `red`: same as value `1`.
@@ -67,8 +69,6 @@ If the value used is invalid, no style will be applied for that format specifier
 You do not need to reset your styles in the end of the string, as Graffiti automatically does it for you if detects that you have used a style.
 
 Old terminal emulators, have limited capabilities when rendering fonts and colors. If you want your program to support them, avoid using bold and italic, and prefer to use only colors of the 3 bits palette.
-
-Some terminal emulators, for instance, `st`, `konsole` and `linux` (the default virtual console of Linux), might render bold or italic with a brighter color.
 
 ### Example
 
