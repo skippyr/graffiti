@@ -39,7 +39,7 @@ Those functions are wrappers of the `fmt.Sprintf` function, which means that you
 
 They will automatically replace those format specifiers with styles sequences, or will remove them automatically of the output if they detect that the stream is not a terminal.
 
-To avoid conflicts with some ANSI sequences, those functions will remove ANSI sequences that apply styles, clear the screen or move the cursor from the string you use as parameter.
+To avoid conflicts with some ANSI sequences, those functions will remove ANSI sequences that apply styles, clear the screen and move the cursor from the string you use as parameter.
 
 ### Format Specifiers
 
@@ -68,7 +68,7 @@ If the value used is invalid, no style will be applied for that format specifier
 
 You do not need to reset your styles in the end of the string, as Graffiti automatically does it for you if detects that you have used a style.
 
-Old terminal emulators, have limited capabilities when rendering fonts and colors. If you want your program to support them, avoid using bold and italic, and prefer to use only colors of the 3 bits palette.
+Old terminal emulators have limited capabilities when rendering fonts and colors. If you want your program to support them, avoid using bold and italic, and prefer to use only colors of the 3 bits palette.
 
 ### Example
 
