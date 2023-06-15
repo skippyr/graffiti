@@ -8,7 +8,7 @@ import (
 	"golang.org/x/term"
 )
 
-type FormatSpecifier struct {
+type formatSpecifier struct {
 	character        rune
 	ansiStyleCode    int
 	doesExpectsColor bool
@@ -57,7 +57,7 @@ var threeBitsAnsiColors = []string{
 	"cyan",
 	"white",
 }
-var formatSpecifiers = []FormatSpecifier{
+var formatSpecifiers = []formatSpecifier{
 	{
 		// Bold
 		character:        'B',
