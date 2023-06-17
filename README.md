@@ -2,9 +2,11 @@
 
 ## Starting Point
 
-Graffiti is a Go module to ease pretty print to standard streams.
+The Graffiti project is a module for the Go Lang that aims to easy pretty printing to standard streams by using new format specifiers to create ANSI escape sequences. It includes support for Windows and UNIX-like operating systems.
 
 ## Installation
+
+The latest stable version of Graffiti can be included in any Go project, by following these steps:
 
 * Inside of your project's directory, download and include this module.
 
@@ -12,7 +14,13 @@ Graffiti is a Go module to ease pretty print to standard streams.
 	go get github.com/skippyr/graffiti
 	```
 
-* Import it in your code.
+	```bash
+	go mod tidy
+	```
+
+	Always use the `tidy` command to automatically cleanup dependencies that your project might not be using.
+
+* Whenever you need it, import it in your code inside of an `import` rule on the top of that file.
 
 	```go
 	import (
@@ -22,13 +30,9 @@ Graffiti is a Go module to ease pretty print to standard streams.
 
 ## Usage
 
-Graffiti exists to solve a very common and annoying problem: coloring and formatting the output of programs. This is a hard task, as it envolves dealing with ANSI escape sequences that are hard to debug, as they are invisible when printed.
-
-Not just that, but if your program is piped to other program or redirected to a file, all the ANSI sequences will remain unless you deal to remove them, which will make the output be hard to parse and understand.
-
 ### Functions
 
-Graffiti offers some functions to help you:
+Graffiti offers these functions to help you print a string into a standard stream:
 
 * `graffiti.Print`: prints to `stdout`.
 * `graffiti.Println`: prints to `stdout` and appends a new line character in the end.
@@ -37,13 +41,13 @@ Graffiti offers some functions to help you:
 
 Those functions are wrappers of the `fmt.Sprintf` function, which means that you can them to format data just like you would normally do with the `fmt.Printf` function. It also returns the same data types. The difference is that they can interpret new format specifiers to apply styles.
 
-They will automatically replace those format specifiers with styles sequences, or will remove them automatically of the output if they detect that the stream is not a terminal.
+They will automatically replace those format specifiers with a respective ANSI sequences, or will remove them automatically of the output if they detect that the stream is being piped or redirected to a file.
 
 To avoid conflicts with some ANSI sequences, those functions will remove ANSI sequences that apply styles, clear the screen and move the cursor from the string you use as parameter.
 
 ### Format Specifiers
 
-These are the new format specifiers, that you can use to apply styles. The text placed after one of them will have their style modified:
+These are the new format specifiers that you can use to apply styles. The text placed after one of them will have their style modified:
 
 * `@F{<color>}`: changes the foreground color.
 * `@K{<color>}`: changes the background color.
