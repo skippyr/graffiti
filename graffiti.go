@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"golang.org/x/term"
 )
@@ -215,6 +216,11 @@ func writeToStream(stream *os.File, text *string, isToAddNewLine bool, arguments
 		*text = removeAnsiEscapeSequences(text)
 	}
 	return fmt.Fprint(stream, *text)
+}
+
+// Treats and returns a string with all occurences of the prefix character used to identify format specifiers that apply styles replaced.
+func EscapePrefix(text string) string {
+	return strings.ReplaceAll(text, string(formatSpecifierPrefixCharacter), strings.Repeat(string(formatSpecifierPrefixCharacter), 2))
 }
 
 // Formats and prints a text to stdout. It accepts all format specifiers of fmt.Printf and also its own to deal with styling. It returns the number of bytes written and any write error encountered.
