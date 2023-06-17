@@ -32,7 +32,7 @@ Graffiti offers these functions to help you print a string into a standard strea
 * `graffiti.Println`: prints to `stdout` and appends a new line character in the end.
 * `graffiti.Eprint`: prints to `stderr`.
 * `graffiti.Eprintln`: prints to `stderr` and appends a new line character in the end.
-* `graffiti.EscapePrefix`: escapes all occurrences of the prefix character used to identify format specifiers that apply styles, making it be able to be printed as a regular text.
+* `graffiti.EscapePrefixCharacters`: escapes all occurrences of the prefix character used to identify format specifiers that apply styles from a string, making it able to be printed as a regular text.
 
 Those functions are wrappers of the `fmt.Sprintf` function, which means that you can them to format data just like you would normally do with the `fmt.Printf` function. It also returns the same data types. The difference is that they can interpret new format specifiers to apply styles.
 
@@ -96,7 +96,7 @@ func main() {
 
     text := "@F{red}Hello @F{yellow}World@r"
 
-    graffiti.Println("            \"%s\" becomes \"%s\"", graffiti.EscapePrefix(text), text)
+    graffiti.Println("            \"%s\" becomes \"%s\"", graffiti.EscapePrefixCharacters(text), text)
     graffiti.Println("")
     graffiti.Println("    @BFormatting")
     graffiti.Println("        Just like fmt.@F{magenta}Printf@r, you can use it to format any value.")
