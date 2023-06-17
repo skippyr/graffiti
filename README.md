@@ -14,12 +14,6 @@ The latest stable version of Graffiti can be included in any Go project, by foll
 	go get github.com/skippyr/graffiti
 	```
 
-	```bash
-	go mod tidy
-	```
-
-	Always use the `tidy` command to automatically cleanup dependencies that your project might not be using.
-
 * Whenever you need it, import it in your code inside of an `import` rule on the top of that file.
 
 	```go
