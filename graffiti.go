@@ -218,7 +218,7 @@ func writeToStream(stream *os.File, text *string, isToAddNewLine bool, arguments
 	return fmt.Fprint(stream, *text)
 }
 
-// Treats and returns a string with all occurences of the prefix character used to identify format specifiers that apply styles replaced.
+// Treats and returns a string with all occurences of the prefix character used to identify format specifiers that apply styles escaped. This make it able to be printed as a regular text.
 func EscapePrefix(text string) string {
 	return strings.ReplaceAll(text, string(formatSpecifierPrefixCharacter), strings.Repeat(string(formatSpecifierPrefixCharacter), 2))
 }

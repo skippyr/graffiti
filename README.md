@@ -32,6 +32,7 @@ Graffiti offers these functions to help you print a string into a standard strea
 * `graffiti.Println`: prints to `stdout` and appends a new line character in the end.
 * `graffiti.Eprint`: prints to `stderr`.
 * `graffiti.Eprintln`: prints to `stderr` and appends a new line character in the end.
+* `graffiti.EscapePrefix`: escapes all occurrences of the prefix character used to identify format specifiers that apply styles, making it be able to be printed as a regular text.
 
 Those functions are wrappers of the `fmt.Sprintf` function, which means that you can them to format data just like you would normally do with the `fmt.Printf` function. It also returns the same data types. The difference is that they can interpret new format specifiers to apply styles.
 
@@ -49,7 +50,7 @@ These are the new format specifiers that you can use to apply styles. The text p
 * `@I`: uses italic. Only visible if using a font that contains italic characters. Some terminal emulators might not render it.
 * `@U`: uses underline.
 * `@r`: removes all styles applied.
-* `@@`: uses an actual `@` character.
+* `@@`: escapes formatting checking and uses an actual `@` character.
 
 The `<color>` placeholder must be replaced by the value of a color of the 8 bits palette (values from `0` to `255` - images of the full palette can be found online and used as reference) or the name of a color of the 3 bits palette:
 
@@ -70,7 +71,8 @@ Old terminal emulators have limited capabilities when rendering fonts and colors
 
 ### Example
 
-Let's create a simple program to test Graffiti's capabilities.
+Let's create a simple demo program to test Graffiti's capabilities.
+
 
 ```go
 // File: main.go
@@ -78,21 +80,38 @@ Let's create a simple program to test Graffiti's capabilities.
 package main
 
 import (
-	"github.com/skippyr/graffiti"
+    "github.com/skippyr/graffiti"
 )
 
 func main() {
-	// Prints a colorful "Hello World!".
-	graffiti.Println("@F{yellow}Hello @F{green}world@F{magenta}!")
+    graffiti.Println("@B@F{red}Graffiti - Quick Demo")
+    graffiti.Println("    @BStarting Point")
+    graffiti.Println("        Let's test out Graffiti's capabilities with a quick demo.")
+    graffiti.Println("")
 
-	// Formats and prints a colorful error message.
-	errorMsg := "No Such File Or Directory"
-	errorOsCode := 2
-	graffiti.Eprintln(
-		"@F{red}@BError:@r @F{yellow}%s @r(os code @F{red}%d@r).",
-		errorMsg,
-		errorOsCode,
-	)
+    graffiti.Println("    @BApplying styles")
+    graffiti.Println("        It can easily apply styles to any text using some format specifiers:")
+    graffiti.Println("        As an example:")
+    graffiti.Println("")
+
+    text := "@F{red}Hello @F{yellow}World@r"
+
+    graffiti.Println("            \"%s\" becomes \"%s\"", graffiti.EscapePrefix(text), text)
+    graffiti.Println("")
+    graffiti.Println("    @BFormatting")
+    graffiti.Println("        Just like fmt.@F{magenta}Printf@r, you can use it to format any value.")
+    graffiti.Println("        As an example, let's format the number @F{cyan}PI@r:")
+    graffiti.Println("")
+
+    pi := 3.1415
+
+    graffiti.Println("            @F{yellow}π@r = @F{red}%.1f", pi)
+    graffiti.Println("")
+
+    graffiti.Println("    @BDocumentation")
+    graffiti.Println("        Access its full documentation at:")
+    graffiti.Println("")
+    graffiti.Println("            @F{red}@Uhttps://github.com/skippyr/graffiti")
 }
 ```
 
@@ -104,13 +123,16 @@ go run main.go
 
 ![](images/preview.png)
 
-To see if the sequences will be removed, let's check out what will be put in a file if the output of the program is redirected to a file called `output.txt`:
+To see if the sequences will be removed, let's redirect the output to a file called `output.txt` and see its contents:
 
 * On Unix-like operating systems:
+
 	```bash
 	go run main.go &>output.txt; cat output.txt
 	```
+
 * On Windows:
+
 	```powershell
 	go run main.go > output.txt 2>&1 & more output.txt
 	```
