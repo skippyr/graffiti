@@ -110,9 +110,9 @@ go run main.go
 
 ![](images/preview.png)
 
-To see if the sequences will be removed, let's check out what will be put in a file if the output of the program is redirected:
+To see if the sequences will be removed, let's check out what will be put in a file if the output of the program is redirected to a file called `output.txt`:
 
-* On Linux:
+* On Unix-like operating systems:
 	```bash
 	go run main.go &>output.txt; cat output.txt
 	```
