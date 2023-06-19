@@ -21,11 +21,12 @@ const (
 	minimumAnsiColorCode = 0
 	maximumAnsiColorCode = 255
 
-	escapeCharacter                 = '\x1b'
-	formatSpecifierPrefixCharacter  = '@'
-	formatSpecifierOpenDelimiter    = '{'
-	formatSpecifierCloseDelimiter   = '}'
-	ansiEscapeSequenceOpenDelimiter = '['
+	escapeCharacter                   = '\x1b'
+	fmtFormatSpecifierPrefixCharacter = '%'
+	formatSpecifierPrefixCharacter    = '@'
+	formatSpecifierOpenDelimiter      = '{'
+	formatSpecifierCloseDelimiter     = '}'
+	ansiEscapeSequenceOpenDelimiter   = '['
 
 	greatestFormatSpecifierColor = "magenta"
 )
@@ -218,9 +219,11 @@ func writeToStream(stream *os.File, text *string, isToAddNewLine bool, arguments
 	return fmt.Fprint(stream, *text)
 }
 
-// Treats and returns a string with all occurences of the prefix character used to identify format specifiers that apply styles escaped. This make it able to be printed as a regular text.
+// Treats and returns a string with all occurences of prefixes character used to identify format specifiers escaped. This make it able to be printed as a regular text.
 func EscapePrefixCharacters(text string) string {
-	return strings.ReplaceAll(text, string(formatSpecifierPrefixCharacter), strings.Repeat(string(formatSpecifierPrefixCharacter), 2))
+	treatedText := strings.ReplaceAll(text, string(formatSpecifierPrefixCharacter), strings.Repeat(string(formatSpecifierPrefixCharacter), 2))
+	treatedText = strings.ReplaceAll(treatedText, string(fmtFormatSpecifierPrefixCharacter), strings.Repeat(string(fmtFormatSpecifierPrefixCharacter), 2))
+	return treatedText
 }
 
 // Formats and prints a text to stdout. It accepts all format specifiers of fmt.Printf and also its own to deal with styling. It returns the number of bytes written and any write error encountered.

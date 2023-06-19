@@ -32,7 +32,7 @@ Graffiti offers these functions to help you print a string into a standard strea
 * `graffiti.Println`: prints to `stdout` and appends a new line character in the end.
 * `graffiti.Eprint`: prints to `stderr`.
 * `graffiti.Eprintln`: prints to `stderr` and appends a new line character in the end.
-* `graffiti.EscapePrefixCharacters`: escapes all occurrences of the prefix character used to identify format specifiers that apply styles from a string, making it able to be printed as a regular text.
+* `graffiti.EscapePrefixCharacters`: escapes all occurences of prefixes character used to identify format specifiers from a string. This make it able to be printed as a regular text.
 
 Those functions are wrappers of the `fmt.Sprintf` function, which means that you can them to format data just like you would normally do with the `fmt.Printf` function. It also returns the same data types. The difference is that they can interpret new format specifiers to apply styles.
 
