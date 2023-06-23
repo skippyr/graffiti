@@ -14,18 +14,18 @@ following these steps:
 
 * Inside of your project's directory, download and include this module.
 
-    ```bash
-    go get github.com/skippyr/graffiti
-    ```
+```bash
+go get github.com/skippyr/graffiti
+```
 
 * Whenever you need it, import it in your code inside of an `import` rule on
   the top of that file.
 
-    ```go
-    import (
-        "github.com/skippyr/graffiti"
-    )
-    ```
+```go
+import (
+    "github.com/skippyr/graffiti"
+)
+```
 
 ## Usage
 
@@ -102,7 +102,6 @@ and prefer to use only colors of the 3 bits palette.
 
 Let's create a simple demo program to test Graffiti's capabilities.
 
-
 ```go
 // File: main.go
 
@@ -156,15 +155,15 @@ To see if the sequences will be removed, let's redirect the output to a file cal
 
 * On Unix-like operating systems:
 
-    ```bash
-    go run main.go &>output.txt; cat output.txt
-    ```
+```bash
+go run main.go &>output.txt; cat output.txt
+```
 
 * On Windows:
 
-    ```powershell
-    go run main.go > output.txt 2>&1 & more output.txt
-    ```
+```powershell
+go run main.go > output.txt 2>&1 & more output.txt
+```
 
 ![](images/preview_pipeline.png)
 
