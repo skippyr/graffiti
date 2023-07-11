@@ -169,10 +169,9 @@ go run main.go > output.txt 2>&1 & more output.txt
 
 As can be seen, all styles are gone as expected.
 
-## Issues And Contributions
+## Issues And Suggestions
 
-Learn how to report issues and contribute to this project by reading its
-[contributions guidelines](https://skippyr.github.io/materials/pages/contributions_guidelines.html).
+Report issues and suggestions through the [issues tab](https://github.com/skippyr/graffiti/issues).
 
 ## License
 
